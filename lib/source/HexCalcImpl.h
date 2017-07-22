@@ -1,14 +1,12 @@
 #pragma once
 
-#include <memory>
+#include <string>
 
-class HexCalcImpl;
 
-class HexCalc
-{
+class HexCalcImpl {
 public:
-  HexCalc();
-  ~HexCalc();
+  HexCalcImpl() = default;
+  ~HexCalcImpl() = default;
   void eval(const std::string &expression);
   uint64_t getUint64() const;
   int64_t getInt64() const;
@@ -17,5 +15,5 @@ public:
   std::string getChars() const;
 
 private:
-  std::unique_ptr<HexCalcImpl> pImpl;
+  int64_t result;
 };
