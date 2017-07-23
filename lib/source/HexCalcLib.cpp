@@ -13,7 +13,7 @@ using namespace std;
 // TODO: add unary operators ~, -
 
 
-//static_assert(is_sorted(std::begin(operations), std::end(operations)), "Operations are not sorted");
+//static_assert(is_sorted(std::begin(binaryOperations), std::end(binaryOperations)), "Operations are not sorted");
 
 
 HexCalc::HexCalc()

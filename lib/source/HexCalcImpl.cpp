@@ -7,33 +7,15 @@ using namespace std;
 namespace
 {
 
-bool notTokenChar(const char c)
-{
-  return isspace(c) || !isalnum(c);
-}
-
-bool validToken(CStringView expression)
-{
-  const char lastChar = tolower(getLastChar(expression));
-  if (expression.length() == 1 && isalpha(lastChar))
-  {
-    return false;
-  }
-  for (size_t i = 0; i < expression.length() -1; ++i)
-  {
-    if (!isdigit(expression[i]))
-      return false;
-  }
-
-  return isdigit(lastChar) || lastChar == 'h' || lastChar == 'i';
-}
-
 int64_t tokenFromBinary(CStringView token)
 {
   int64_t result = 0;
   for (auto item : token)
   {
-    assert((item == 0 || item == 1) && "token should be a binary digit");
+    if (item != '0' && item != '1')
+    {
+      throw logic_error("token should be a binary digit");
+    }
     result *= 2;
     result += item - '0';
   }
@@ -67,95 +49,137 @@ int64_t tokenFromDecimal(CStringView token)
   int64_t result = 0;
   for (auto item : token)
   {
-    assert(isdigit(item) && "token should be a digit");
+    if (!isdigit(item))
+    {
+      throw logic_error("token should be a digit");
+    }
     result *= 10;
     result += item - '0';
   }
   return result;
 }
 
-int64_t tokenToInt(CStringView token)
+bool isHexDigit(char c)
 {
-  char lastLetter = tolower(getLastChar(token));
-  if (lastLetter == 'h')
-    return tokenFromHex(token.subspan(0, token.length()-1));
-  if (lastLetter == 'i')
-    return tokenFromBinary(token.subspan(0, token.length()-1));
-  else
-    return tokenFromDecimal(token);
+  return isdigit(c) || (tolower(c) >= 'a' && tolower(c) <= 'f');
 }
 
+int64_t getExpressionImpl(CStringView expression, size_t &pos);
+
+// pos is out argument
 int64_t getToken(CStringView expression, size_t &pos)
 {
-  size_t startToken = getFirstNonEmptySymbol(expression);
-  size_t endToken = find_if(expression.begin() + startToken,
-                            expression.end(), notTokenChar) - expression.begin();
-  pos = endToken;
-  if (startToken == endToken)
+  pos = getFirstNonEmptySymbol(expression);
+  if (expression[pos] == '(')
   {
+    size_t localPos;
+    int64_t token = getExpressionImpl(expression.subspan(++pos), localPos);
+
+    pos += localPos;
+    if (static_cast<size_t>(expression.length()) <= pos || expression[pos] != ')')
+    {
+      throw logic_error("Unexpected symbol. Expected ')'");
+    }
+    ++pos;
+    return token;
+  }
+  if (auto unary = getUnaryOperation(expression, pos))
+  {
+    size_t localPos;
+    int64_t result = getToken(expression.subspan(pos), localPos);
+    pos += localPos;
+    return unary->apply(result);
+  }
+
+  // start parsing number
+  size_t startNum = pos;
+  // find first non-digit
+  for (;pos < static_cast<size_t>(expression.length()) && isHexDigit(expression[pos]); ++pos)
+  {}
+
+  if (startNum == pos)
+  {
+    // no digits found
     throw std::logic_error("Can't get token");
   }
-
-  CStringView token = expression.subspan(startToken, endToken -  startToken);
-  if (!validToken(token))
+  if (pos == static_cast<size_t>(expression.length()))
   {
-    throw std::logic_error(string("Token ") + std::string(token.begin(), token.end()) + " is not valid");
+    return tokenFromDecimal(expression.subspan(startNum));
   }
 
-  return tokenToInt(token);
-
-}
-
-inline const TokenOperation * getOperationAndCheck(
-  CStringView &expression, size_t &pos)
-{
-  const TokenOperation * op = getOperation(expression, pos);
-  if (op == nullptr && pos != expression.length())
+  if (tolower(expression[pos]) == 'i')
   {
-    throw logic_error("Operation wasn't met");
+    return tokenFromBinary(expression.subspan(startNum, pos++));
   }
-  expression = expression.subspan(pos);
-  return op;
+  if (tolower(expression[pos]) == 'h')
+  {
+    return tokenFromHex(expression.subspan(startNum, pos++));
+  }
+  return tokenFromDecimal(expression.subspan(startNum, pos - startNum));
 }
 
-int64_t getExpression(const int64_t arg1, const TokenOperation *operation, CStringView expression)
+
+int64_t getExpressionImpl(const int64_t arg1, const BinaryOperation *operation, CStringView expression,
+                          size_t &pos)
 {
-  size_t pos;
+  size_t localPos = 0;
   const int64_t arg2 = getToken(expression, pos);
   expression = expression.subspan(pos);
-  auto nextOperation = getOperationAndCheck(expression, pos);
+  auto nextOperation = getBinaryOperation(expression, localPos);
+  expression = expression.subspan(localPos);
+  pos += localPos;
   if (nextOperation == nullptr)
   {
     // we reached end of expression
     return operation->apply(arg1, arg2);
   }
-  if (operation->getPrecedence() > nextOperation->getPrecedence() ||
-      nextOperation->getAssociativity() == Associativity::Left)
-  {
-    int64_t result = operation->apply(arg1, arg2);
-    return getExpression(result, nextOperation, expression);
-    //return
-  }
-  int64_t result = getExpression(arg2, nextOperation, expression);
-  return operation->apply(arg1, result);
 
+  const int operationPrecedence = operation->getPrecedence();
+  const int nextOperationPrecedence = nextOperation->getPrecedence();
+  if (operationPrecedence > nextOperationPrecedence ||
+    (operationPrecedence == nextOperationPrecedence &&
+      nextOperation->getAssociativity() == Associativity::Left))
+  {
+    int64_t newArg = operation->apply(arg1, arg2);
+    int64_t result = getExpressionImpl(newArg, nextOperation, expression, localPos);
+    pos += localPos;
+    return result;
+  }
+
+  int64_t newArg = getExpressionImpl(arg2, nextOperation, expression, localPos);
+  pos += localPos;
+  return operation->apply(arg1, newArg);
 }
 
-int64_t getExpression(CStringView expression)
+int64_t getExpressionImpl(CStringView expression, size_t &pos)
 {
-  size_t pos;
+  size_t localPos = 0;
   int64_t arg1 = getToken(expression, pos);
   expression = expression.subspan(pos);
 
-  auto op = getOperationAndCheck(expression, pos);
+  auto op =  getBinaryOperation(expression, localPos);
+  expression = expression.subspan(localPos);
+  pos += localPos;
   if (op == nullptr)
   {
     // we reached end of expression
     return arg1;
   }
 
-  return getExpression(arg1, op, expression);
+  int64_t result = getExpressionImpl(arg1, op, expression, localPos);
+  pos += localPos;
+  return result;
+}
 
+int64_t getExpression(CStringView expression)
+{
+  size_t pos;
+  int64_t result = getExpressionImpl(expression, pos);
+  if (pos != static_cast<size_t>(expression.length()))
+  {
+    throw logic_error("Can't parse all expression"); // TODO: change
+  }
+  return result;
 }
 
 void toBinaryImpl(string& result, uint64_t val)
@@ -163,7 +187,7 @@ void toBinaryImpl(string& result, uint64_t val)
   if (val > 1)
   {
     toBinaryImpl(result, val / 2);
-    result.push_back('0' + val % 2);
+    result.push_back('0' + (val % 2));
   }
   else if (val == 1)
     result.push_back('1');

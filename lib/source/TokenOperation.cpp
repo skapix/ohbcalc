@@ -23,53 +23,46 @@ int64_t expodential(int64_t a, int64_t b)
   return a;
 }
 
+
+// add logical: ||, &&, ==
 // Binary operations
-const TokenOperation operations[]
+const BinaryOperation binaryOperations[]
   {
-    TokenOperation(Associativity::Left, 15, "<<", [](int64_t a, int64_t b){ return a << b;}),
-    TokenOperation(Associativity::Left, 15, ">>", [](int64_t a, int64_t b){ return a >> b;}),
-    TokenOperation(Associativity::Right, 40, "**", [](int64_t a, int64_t b){ return std::pow(a, b);}),
-    TokenOperation(Associativity::Left, 20, "+", [](int64_t a, int64_t b){ return a + b;}),
-    TokenOperation(Associativity::Left, 20, "-", [](int64_t a, int64_t b){ return a - b;}),
-    TokenOperation(Associativity::Left, 30, "*", [](int64_t a, int64_t b){ return a * b;}),
-    TokenOperation(Associativity::Left, 30, "/", [](int64_t a, int64_t b){ return a / b;}),
-    TokenOperation(Associativity::Left, 30, "%", [](int64_t a, int64_t b){ return a % b;}),
-    TokenOperation(Associativity::Left, 8, "|", [](int64_t a, int64_t b){ return a | b;}),
-    TokenOperation(Associativity::Left, 9, "^", [](int64_t a, int64_t b){ return a ^ b;}),
-    TokenOperation(Associativity::Left, 10, "&", [](int64_t a, int64_t b){ return a & b;}),
+    BinaryOperation(Associativity::Left, 15, "<<", [](int64_t a, int64_t b){ return a << b;}),
+    BinaryOperation(Associativity::Left, 15, ">>", [](int64_t a, int64_t b){ return a >> b;}),
+    BinaryOperation(Associativity::Right, 40, "**", [](int64_t a, int64_t b){ return std::pow(a, b);}),
+    BinaryOperation(Associativity::Left, 20, "+", [](int64_t a, int64_t b){ return a + b;}),
+    BinaryOperation(Associativity::Left, 20, "-", [](int64_t a, int64_t b){ return a - b;}),
+    BinaryOperation(Associativity::Left, 30, "*", [](int64_t a, int64_t b){ return a * b;}),
+    BinaryOperation(Associativity::Left, 30, "/", [](int64_t a, int64_t b){ return a / b;}),
+    BinaryOperation(Associativity::Left, 30, "%", [](int64_t a, int64_t b){ return a % b;}),
+    BinaryOperation(Associativity::Left, 8, "|", [](int64_t a, int64_t b){ return a | b;}),
+    BinaryOperation(Associativity::Left, 9, "^", [](int64_t a, int64_t b){ return a ^ b;}),
+    BinaryOperation(Associativity::Left, 10, "&", [](int64_t a, int64_t b){ return a & b;}),
   };
 
 
-static bool notOperatorChar(const char c)
-{
-  return isspace(c) || isalnum(c);
-}
 
-
-
-
-bool operator<(const TokenOperation &left, const TokenOperation &right)
+bool operator<(const BinaryOperation &left, const BinaryOperation &right)
 {
   return left.getRepresentation() <  right.getRepresentation();
 }
 
-bool operator==(const TokenOperation &left, const CStringView str)
+bool operator==(const BinaryOperation &left, const CStringView str)
 {
   return left.getRepresentation() ==  str;
 }
 
-//static TokenOperation sortedOperations[end(operations) - begin(operations)];
 
-//ArrayView
-constexpr ArrayView<const TokenOperation> getOperations() {
-  return ArrayView<const TokenOperation>(&operations[0], end(operations) - begin(operations));
+constexpr ArrayView<const BinaryOperation> getOperations() {
+  return ArrayView<const BinaryOperation>(&binaryOperations[0], end(binaryOperations) - begin(binaryOperations));
 }
 
 
 static constexpr size_t getMaxTokenLenght()
 {
   size_t result = 0;
-  for (const TokenOperation &op : operations)
+  for (const BinaryOperation &op : binaryOperations)
     result = max<size_t>(result, op.getRepresentation().length());
   return result;
 }
@@ -77,30 +70,50 @@ static constexpr size_t getMaxTokenLenght()
 
 static const size_t maxTokenLength = getMaxTokenLenght();
 
-const TokenOperation *getOperation(const CStringView str, size_t &endOperator)
+
+template <typename T>
+const T* getOperation(const T* begin, const T* end, CStringView str, size_t &endOperator)
 {
-  size_t startSymbol = getFirstNonEmptySymbol(str);
-  if (startSymbol == str.size())
-  {
-    endOperator = startSymbol;
-    return nullptr;
-  }
-
-  size_t endSymbol = find_if(str.begin() + startSymbol, str.end(), notOperatorChar) - str.begin();
-  endOperator = endSymbol;
-
-  if (startSymbol == endSymbol)
+  if (str.length() == 0)
   {
     return nullptr;
   }
-
-  CStringView possibleToken = str.subspan(startSymbol, endSymbol - startSymbol);
-
-  auto it = find(begin(operations), end(operations), possibleToken);
-
-  if (it == end(operations))
+  for (const T *it = begin; it != end; ++it)
   {
-    throw logic_error(string("Unknown operator ") + string(possibleToken.begin(), possibleToken.end()));
+    CStringView operation = it->getRepresentation();
+    if (str.length() < operation.length())
+    {
+      continue;
+    }
+
+    if (operation == str.subspan(0, operation.length()))
+    {
+      endOperator += operation.length();
+      return it;
+    }
   }
-  return &*it;
+  return nullptr;
+}
+
+const BinaryOperation *getBinaryOperation(const CStringView str, size_t &endOperator)
+{
+  endOperator = getFirstNonEmptySymbol(str);
+  return getOperation(begin(binaryOperations), end(binaryOperations), str.subspan(endOperator), endOperator);
+}
+
+const UnaryOperation unaryOperations[]
+  {
+    UnaryOperation("-", [](int64_t val){ return -val;}),
+    UnaryOperation("~", [](int64_t val){ return ~val;})
+  };
+
+bool operator==(const UnaryOperation &left, const CStringView str)
+{
+  return left.getRepresentation() ==  str;
+}
+
+const UnaryOperation *getUnaryOperation(const CStringView str, size_t &endOperator)
+{
+  endOperator = getFirstNonEmptySymbol(str);
+  return getOperation(begin(unaryOperations), end(unaryOperations), str.subspan(endOperator), endOperator);
 }

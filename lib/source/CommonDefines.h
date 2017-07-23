@@ -1,4 +1,4 @@
-#pragma ones
+#pragma once
 
 #include <gsl/gsl>
 #include <gsl/string_span>
