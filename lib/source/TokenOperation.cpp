@@ -1,5 +1,4 @@
 #include "TokenOperation.h"
-#include <iterator>
 #include <algorithm>
 #include <cmath>
 
@@ -23,9 +22,7 @@ int64_t expodential(int64_t a, int64_t b)
   return a;
 }
 
-
-// add logical: ||, &&, ==
-// Binary operations
+// Operations with different Associativity should have different precedence!
 const BinaryOperation binaryOperations[]
   {
     BinaryOperation(Associativity::Left, 15, "<<", [](int64_t a, int64_t b){ return a << b;}),
@@ -36,39 +33,23 @@ const BinaryOperation binaryOperations[]
     BinaryOperation(Associativity::Left, 30, "*", [](int64_t a, int64_t b){ return a * b;}),
     BinaryOperation(Associativity::Left, 30, "/", [](int64_t a, int64_t b){ return a / b;}),
     BinaryOperation(Associativity::Left, 30, "%", [](int64_t a, int64_t b){ return a % b;}),
+    BinaryOperation(Associativity::Left, 8, "||", [](int64_t a, int64_t b){ return a || b;}),
     BinaryOperation(Associativity::Left, 8, "|", [](int64_t a, int64_t b){ return a | b;}),
     BinaryOperation(Associativity::Left, 9, "^", [](int64_t a, int64_t b){ return a ^ b;}),
-    BinaryOperation(Associativity::Left, 10, "&", [](int64_t a, int64_t b){ return a & b;})
+    BinaryOperation(Associativity::Left, 10, "&&", [](int64_t a, int64_t b){ return a && b;}),
+    BinaryOperation(Associativity::Left, 10, "&", [](int64_t a, int64_t b){ return a & b;}),
+    BinaryOperation(Associativity::Left, 12, "<=", [](int64_t a, int64_t b){ return a <= b;}),
+    BinaryOperation(Associativity::Left, 12, "<", [](int64_t a, int64_t b){ return a < b;}),
+    BinaryOperation(Associativity::Left, 12, ">=", [](int64_t a, int64_t b){ return a >= b;}),
+    BinaryOperation(Associativity::Left, 12, ">", [](int64_t a, int64_t b){ return a > b;}),
+    BinaryOperation(Associativity::Left, 11, "==", [](int64_t a, int64_t b){ return a == b;}),
+    BinaryOperation(Associativity::Left, 11, "!=", [](int64_t a, int64_t b){ return a != b;})
   };
-
-
-
-bool operator<(const BinaryOperation &left, const BinaryOperation &right)
-{
-  return left.getRepresentation() <  right.getRepresentation();
-}
 
 bool operator==(const BinaryOperation &left, const CStringView str)
 {
   return left.getRepresentation() ==  str;
 }
-
-
-constexpr ArrayView<const BinaryOperation> getOperations() {
-  return ArrayView<const BinaryOperation>(&binaryOperations[0], end(binaryOperations) - begin(binaryOperations));
-}
-
-
-static constexpr size_t getMaxTokenLenght()
-{
-  size_t result = 0;
-  for (const BinaryOperation &op : binaryOperations)
-    result = max<size_t>(result, op.getRepresentation().length());
-  return result;
-}
-
-
-static const size_t maxTokenLength = getMaxTokenLenght();
 
 
 template <typename T>
@@ -78,6 +59,8 @@ const T* getOperation(const T* begin, const T* end, CStringView str, size_t &end
   {
     return nullptr;
   }
+
+  // TODO: binary operation could be found more efficiently
   for (const T *it = begin; it != end; ++it)
   {
     CStringView operation = it->getRepresentation();
@@ -102,10 +85,11 @@ const BinaryOperation *getBinaryOperation(const CStringView str, size_t &endOper
 }
 
 const UnaryOperation unaryOperations[]
-  {
-    UnaryOperation("-", [](int64_t val){ return -val;}),
-    UnaryOperation("~", [](int64_t val){ return ~val;})
-  };
+{
+  UnaryOperation("-", [](int64_t val){ return -val;}),
+  UnaryOperation("~", [](int64_t val){ return ~val;}),
+  UnaryOperation("!", [](int64_t val){ return static_cast<int64_t >(!val);})
+};
 
 bool operator==(const UnaryOperation &left, const CStringView str)
 {

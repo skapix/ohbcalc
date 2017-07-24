@@ -6,7 +6,7 @@
 class UnaryOperation
 {
 public:
-  UnaryOperation(CStringView representation, std::function<int64_t(int64_t)> implementation)
+  UnaryOperation(CStringView representation, std::function<int64_t(int64_t)> implementation) noexcept
     : representation(representation)
     , implementation(std::move(implementation))
   {}
@@ -30,7 +30,7 @@ class BinaryOperation
 {
 public:
   BinaryOperation(Associativity associativity, const int precedence, const CStringView representation,
-  std::function<int64_t(int64_t, int64_t)> implementation)
+  std::function<int64_t(int64_t, int64_t)> implementation) noexcept
     : associativity(associativity)
     , precedence(precedence)
     , representation(representation)

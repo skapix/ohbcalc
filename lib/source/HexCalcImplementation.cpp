@@ -7,22 +7,26 @@ using namespace std;
 namespace
 {
 
-int64_t tokenFromBinary(CStringView token)
+// base <= 10
+template <int Base>
+int64_t tokenFromBase(CStringView token)
 {
+  assert(Base <= 10 && "Wrong usage");
   int64_t result = 0;
   for (auto item : token)
   {
-    if (item != '0' && item != '1')
+    if (item < '0' || item >= '0' + Base)
     {
-      throw logic_error("token should be a binary digit");
+      throw logic_error(string("Can't decode character ") + to_string(item) +  " in base " + to_string(Base));
     }
-    result *= 2;
+    result *= Base;
     result += item - '0';
   }
   return result;
 }
 
-int64_t tokenFromHex(CStringView token)
+template <>
+int64_t tokenFromBase<16>(CStringView token)
 {
   int64_t result = 0;
   for (auto item : token)
@@ -38,23 +42,8 @@ int64_t tokenFromHex(CStringView token)
     }
     else
     {
-      assert(false && "Met not a hex number");
+      throw logic_error(string("Can't decode character ") + to_string(item) +  " in base 16");
     }
-  }
-  return result;
-}
-
-int64_t tokenFromDecimal(CStringView token)
-{
-  int64_t result = 0;
-  for (auto item : token)
-  {
-    if (!isdigit(item))
-    {
-      throw logic_error("token should be a digit");
-    }
-    result *= 10;
-    result += item - '0';
   }
   return result;
 }
@@ -93,7 +82,14 @@ int64_t getToken(CStringView expression, size_t &pos)
 
   // start parsing number
   size_t startNum = pos;
-  // find first non-digit
+  // workaround: we want to use 0x as hex prefix
+  bool forceHex = false;
+  if (expression.length() - pos > 2 && expression[pos] == '0' && tolower(expression[pos+1]) == 'x')
+  {
+    pos += 2;
+    startNum = pos;
+    forceHex = true;
+  }
   for (;pos < static_cast<size_t>(expression.length()) && isHexDigit(expression[pos]); ++pos)
   {}
 
@@ -102,20 +98,32 @@ int64_t getToken(CStringView expression, size_t &pos)
     // no digits found
     throw std::logic_error("Can't get token");
   }
+
+  if (forceHex)
+  {
+    return tokenFromBase<16>(expression.subspan(startNum, pos - startNum));
+  }
+
   if (pos == static_cast<size_t>(expression.length()))
   {
-    return tokenFromDecimal(expression.subspan(startNum));
+    return tokenFromBase<10>(expression.subspan(startNum));
   }
+
+  // check suffix
 
   if (tolower(expression[pos]) == 'i')
   {
-    return tokenFromBinary(expression.subspan(startNum, pos++));
+    return tokenFromBase<2>(expression.subspan(startNum, pos++ - startNum));
+  }
+  if (tolower(expression[pos]) == 'o')
+  {
+    return tokenFromBase<8>(expression.subspan(startNum, pos++ - startNum));
   }
   if (tolower(expression[pos]) == 'h')
   {
-    return tokenFromHex(expression.subspan(startNum, pos++));
+    return tokenFromBase<16>(expression.subspan(startNum, pos++ - startNum));
   }
-  return tokenFromDecimal(expression.subspan(startNum, pos - startNum));
+  return tokenFromBase<10>(expression.subspan(startNum, pos - startNum));
 }
 
 
@@ -180,7 +188,7 @@ int64_t HexCalcImplementation::eval(const std::string &expression) {
   int64_t result = getExpressionImpl(expression, pos);
   if (pos != static_cast<size_t>(expression.length()))
   {
-    throw logic_error("Can't parse all expression"); // TODO: change
+    throw logic_error(string("Can't parse all expression, stopped at position ") + std::to_string(pos));
   }
   return result;
 }

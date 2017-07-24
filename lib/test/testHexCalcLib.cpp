@@ -1,10 +1,8 @@
 #include "hexCalc.h"
 #include <gtest/gtest.h>
-#include <limits>
 
 using namespace std;
-// TODO: add testing little/big endian
-// TODO: check, that binaryOperations with equal Precedence have equal Associativity
+// TODO: test on big-endian machine
 
 class HexCalcTest : public ::testing::Test
 {
@@ -35,6 +33,8 @@ TEST_F(HexCalcTest, with_unary_operator)
   testEval("(-10)", -10);
   testEval("(-9103)", -9103);
   testEval("~(2113)", ~2113);
+  testEval("!2113", 0);
+  testEval("!0", 1);
 }
 
 TEST_F(HexCalcTest, skip_spaces)
@@ -53,16 +53,46 @@ TEST_F(HexCalcTest, many_unary_operators)
 TEST_F(HexCalcTest, all_operations)
 {
   testEval("19 << 2", 19 << 2);
+  testEval("1094 << 5", 1094 << 5);
   testEval("19 >> 2", 19 >> 2);
+  testEval("2 >> 2", 2 >> 2);
   testEval("19 ** 2", 19 * 19);
+  testEval("2 ** 5", 32);
   testEval("19 + 2", 19 + 2);
+  testEval("190123 + 90123312", 190123 + 90123312);
   testEval("19 - 2", 19 - 2);
+  testEval("19209859519 - 1248512", 19209859519 - 1248512);
   testEval("19 * 2", 19 * 2);
+  testEval("190001 * 22220", static_cast<int64_t>(190001) * 22220);
   testEval("19 / 2", 19 / 2);
+  testEval("19930111 / 1245", 19930111 / 1245);
   testEval("19 % 2", 19 % 2);
+  testEval("19930111 % 1245", 19930111 % 1245);
   testEval("19 | 2", 19 | 2);
+  testEval("1234567890 | 123", 1234567890 | 123);
   testEval("19 ^ 2", 19 ^ 2);
+  testEval("1901 ^ 25", 1901 ^ 25);
   testEval("19 & 2", 19 & 2);
+  testEval("1901 & 25", 1901 & 25);
+
+  testEval("19 < 2", 19 < 2);
+  testEval("2 < 2", 2 < 2);
+  testEval("19 > 2", 19 > 2);
+  testEval("2 > 2", 2 > 2);
+  testEval("19 <= 2", 19 <= 2);
+  testEval("2 <= 2", 2 <= 2);
+  testEval("19 >= 2", 19 >= 2);
+  testEval("2 >= 2", 2 >= 2);
+  testEval("19 != 2", 19 != 2);
+  testEval("19 != 19", false);
+  testEval("19 == 2", 19 == 2);
+  testEval("19 == 19", true);
+  testEval("19 || 2", 1);
+  testEval("0 || 1", 1);
+  testEval("0 || 0", 0);
+  testEval("19 && 2", 1);
+  testEval("0 && 1", 0);
+  testEval("0 && 0", 0);
 }
 
 TEST_F(HexCalcTest, brackets_evaluation)
@@ -88,7 +118,11 @@ TEST_F(HexCalcTest, correct_decoding)
   testEval("1010101010111i", 5463);
   testEval("1010101010111010101011110I", 22377822);
   testEval("AAAAh", 0xAAAA);
-  testEval("1234567890ABCDEFH", 1311768467294899695);
+  testEval("1234567890ABCDEFH", 1311768467294899695ull);
+  testEval("0x11", 17);
+  testEval("0xABCD", 0xABCD);
+  testEval("25o", 21);
+  testEval("253477o", 87871);
 
 }
 
@@ -96,5 +130,14 @@ TEST_F(HexCalcTest, mixing_types)
 {
   testEval("10i+101i-1i", 6);
   testEval("10h+101h-1h", 0x101 + 15);
-  testEval("10i+2Fh-3", 46);
+  testEval("10i+2Fh-0x3", 46);
+}
+
+TEST_F(HexCalcTest, recurse_brackets)
+{
+  testEval("3 * (((2 - 3) + 4 * 5) / 2 + 3) ", 36);
+  testEval("(1000i + 11o) & ( E0h + 0xE)", 0);
+
+  testEval("3 * (((2 - 3) + 4 * 5) / 2 ) - 4 * (1 + 2 * (-1 + 1i) )", 27 - 4);
+  testEval("(AH ^ (0x5F - 1010111i)) * (17o + (24h-24)*11i)", 102);
 }
