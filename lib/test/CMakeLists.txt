@@ -6,7 +6,7 @@ endif(NOT ${GTest_FOUND})
 
 enable_testing()
 
-set(test_source ${CMAKE_CURRENT_SOURCE_DIR}/testHexCalcLib.cpp)
+set(test_source ${CMAKE_CURRENT_SOURCE_DIR}/testHexCalcLib.cpp testTransforms.cpp)
 add_executable(HexCalcTest ${test_source})
 target_link_libraries(HexCalcTest GTest::GTest GTest::Main HexCalcLib)
 

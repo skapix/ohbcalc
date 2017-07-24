@@ -38,7 +38,7 @@ const BinaryOperation binaryOperations[]
     BinaryOperation(Associativity::Left, 30, "%", [](int64_t a, int64_t b){ return a % b;}),
     BinaryOperation(Associativity::Left, 8, "|", [](int64_t a, int64_t b){ return a | b;}),
     BinaryOperation(Associativity::Left, 9, "^", [](int64_t a, int64_t b){ return a ^ b;}),
-    BinaryOperation(Associativity::Left, 10, "&", [](int64_t a, int64_t b){ return a & b;}),
+    BinaryOperation(Associativity::Left, 10, "&", [](int64_t a, int64_t b){ return a & b;})
   };
 
 

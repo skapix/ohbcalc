@@ -2,20 +2,14 @@
 
 #include <memory>
 
-class HexCalcImpl;
+class HexCalcImplementation;
 
 class HexCalc
 {
 public:
   HexCalc();
   ~HexCalc();
-  void eval(const std::string &expression);
-  uint64_t getUint64() const;
-  int64_t getInt64() const;
-  std::string getBinary() const;
-  std::string getHex() const;
-  std::string getChars() const;
-
+  int64_t eval(const std::string &expression);
 private:
-  std::unique_ptr<HexCalcImpl> pImpl;
+  std::unique_ptr<HexCalcImplementation> pImpl;
 };

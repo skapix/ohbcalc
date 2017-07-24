@@ -46,7 +46,7 @@ if (NOT GSL_COMPILED)
 	message(STATUS "GSL was successfully downloaded")
 endif(NOT GSL_COMPILED)
 
-set(sources source/HexCalcLib.cpp source/HexCalcImpl.cpp source/HexCalcImpl.h test/testHexCalcLib.cpp source/TokenOperation.cpp source/TokenOperation.h source/CommonDefines.h source/CommonDefines.cpp)
+set(sources source/HexCalcLib.cpp source/HexCalcImplementation.cpp source/HexCalcImplementation.h test/testHexCalcLib.cpp source/TokenOperation.cpp source/TokenOperation.h source/CommonDefines.h source/CommonDefines.cpp include/hexCalcTransform.h include/transformImpl/TransformImpl.h)
 
 add_library(HexCalcLib ${sources})
 target_include_directories(HexCalcLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

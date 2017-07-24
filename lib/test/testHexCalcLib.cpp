@@ -6,81 +6,48 @@ using namespace std;
 // TODO: add testing little/big endian
 // TODO: check, that binaryOperations with equal Precedence have equal Associativity
 
-const static uint64_t maxUint64 = numeric_limits<uint64_t>::max();
-const static string stringOnes[] = {
-  "",
-  "11111111",
-  "1111111111111111",
-  "111111111111111111111111",
-  "11111111111111111111111111111111",
-  "1111111111111111111111111111111111111111",
-  "111111111111111111111111111111111111111111111111",
-  "11111111111111111111111111111111111111111111111111111111",
-  "1111111111111111111111111111111111111111111111111111111111111111"
-};
-
-const static string charOnes[] = {
-  "",
-  "\xFF",
-  "\xFF\xFF",
-  "\xFF\xFF\xFF",
-  "\xFF\xFF\xFF\xFF",
-  "\xFF\xFF\xFF\xFF\xFF",
-  "\xFF\xFF\xFF\xFF\xFF\xFF",
-  "\xFF\xFF\xFF\xFF\xFF\xFF\xFF",
-  "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
-};
-
 class HexCalcTest : public ::testing::Test
 {
 protected:
   HexCalc calculator;
-  void testExpression(const string &expression, int64_t rInt, uint64_t rUint,
-                      const string &rHex, const string &rBin, const string &rChars)
-  {
-    const string calculating = "Calculating ";
-    calculator.eval(expression);
-    SCOPED_TRACE(calculating + expression);
-    EXPECT_EQ(calculator.getInt64(), rInt);
-    EXPECT_EQ(calculator.getUint64(), rUint);
-    EXPECT_EQ(calculator.getHex(), rHex);
-    EXPECT_EQ(calculator.getBinary(), rBin);
-    EXPECT_EQ(calculator.getChars(), rChars);
-  }
 
   void testEval(const string &expression, int64_t result)
   {
-    const string calculating = "Calculating ";
-    calculator.eval(expression);
-    SCOPED_TRACE(calculating + expression);
-    EXPECT_EQ(calculator.getInt64(), result);
+    const string trace = string("Calculating ") + expression;
+    SCOPED_TRACE(trace.c_str());
+    EXPECT_EQ(calculator.eval(expression), result);
   }
 };
 
-TEST_F(HexCalcTest, solo_binary_operation)
+
+TEST_F(HexCalcTest, solo_number)
 {
-  testExpression("1+2", 3, 3, "3", "11", "\3");
-  testExpression("6+9", 15, 15, "F", "1111", "\x0f");
-  testExpression("9+11", 20, 20, "14", "10100", "\x14");
-  testExpression("0-0", 0, 0, "0", "0", "");
-  testExpression("0+1965", 1965, 1965, "7AD", "11110101101", "\x07\xAD");
+  testEval("3", 3);
+  testEval("243", 243);
+  testEval("1894", 1894);
+  testEval("(1893)", 1893);
+
+}
+
+TEST_F(HexCalcTest, with_unary_operator)
+{
+  testEval("-5", -5);
+  testEval("(-10)", -10);
+  testEval("(-9103)", -9103);
+  testEval("~(2113)", ~2113);
 }
 
 TEST_F(HexCalcTest, skip_spaces)
 {
-  testExpression("  1   + 2   ", 3, 3, "3", "11", "\3");
+  testEval("  (  1     ) ", 1);
+  testEval("(  1   + 2   )", 3);
+  testEval("  1   + 2   ", 3);
 }
 
-TEST_F(HexCalcTest, solo_number)
+TEST_F(HexCalcTest, many_unary_operators)
 {
-  testExpression("3", 3, 3, "3", "11", "\3");
-  testExpression("-3", -3, maxUint64-2, "FFFFFFFFFFFFFFFD", stringOnes[7] + "11111101", charOnes[7] + "\xFD");
-}
-
-TEST_F(HexCalcTest, mixing)
-{
-  testExpression("3---------3", 0, 0, "0", "0", "");
-  testExpression("--3---~--~--3", 0, 0, "0", "0", "");
+  testEval("3---------3", 0);
+  testEval("--3---~--~--3", 0);
 }
 
 TEST_F(HexCalcTest, all_operations)
@@ -98,11 +65,13 @@ TEST_F(HexCalcTest, all_operations)
   testEval("19 & 2", 19 & 2);
 }
 
-TEST_F(HexCalcTest, brackets)
+TEST_F(HexCalcTest, brackets_evaluation)
 {
   testEval("(1)", 1);
   testEval("(1+2)", 3);
   testEval("(1+2+3)*4", 24);
+  testEval("2*(1+2+3)", 12);
+  testEval("(1+2+3)*(4+3-2)", 30);
 }
 
 TEST_F(HexCalcTest, precedence)
@@ -118,6 +87,7 @@ TEST_F(HexCalcTest, correct_decoding)
 {
   testEval("1010101010111i", 5463);
   testEval("1010101010111010101011110I", 22377822);
+  testEval("AAAAh", 0xAAAA);
   testEval("1234567890ABCDEFH", 1311768467294899695);
 
 }

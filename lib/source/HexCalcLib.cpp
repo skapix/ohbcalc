@@ -1,5 +1,5 @@
 #include "hexCalc.h"
-#include "HexCalcImpl.h"
+#include "HexCalcImplementation.h"
 #include <algorithm>
 
 #include <gsl/gsl>
@@ -7,44 +7,18 @@
 
 using namespace std;
 
-
-
 // TODO: watch c++ precedence
-// TODO: add unary operators ~, -
-
 
 //static_assert(is_sorted(std::begin(binaryOperations), std::end(binaryOperations)), "Operations are not sorted");
 
 
 HexCalc::HexCalc()
-  : pImpl(new HexCalcImpl())
+  : pImpl(new HexCalcImplementation())
 {}
 
 HexCalc::~HexCalc() {}
 
-void HexCalc::eval(const std::string &expression)
+int64_t HexCalc::eval(const std::string &expression)
 {
-  pImpl->eval(expression);
-}
-
-uint64_t HexCalc::getUint64() const
-{
-  return pImpl->getUint64();
-}
-
-int64_t HexCalc::getInt64() const
-{
-  return pImpl->getInt64();
-}
-std::string HexCalc::getBinary() const
-{
-  return pImpl->getBinary();
-}
-std::string HexCalc::getHex() const
-{
-  return pImpl->getHex();
-}
-std::string HexCalc::getChars() const
-{
-  return pImpl->getChars();
+  return pImpl->eval(expression);
 }

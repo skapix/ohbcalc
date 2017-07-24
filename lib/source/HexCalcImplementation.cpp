@@ -1,4 +1,4 @@
-#include "HexCalcImpl.h"
+#include "HexCalcImplementation.h"
 #include "CommonDefines.h"
 #include "TokenOperation.h"
 
@@ -69,12 +69,18 @@ int64_t getExpressionImpl(CStringView expression, size_t &pos);
 // pos is out argument
 int64_t getToken(CStringView expression, size_t &pos)
 {
-  pos = getFirstNonEmptySymbol(expression);
+  if (auto unary = getUnaryOperation(expression, pos))
+  {
+    size_t localPos;
+    int64_t result = getToken(expression.subspan(pos), localPos);
+    pos += localPos;
+    return unary->apply(result);
+  }
+
   if (expression[pos] == '(')
   {
     size_t localPos;
     int64_t token = getExpressionImpl(expression.subspan(++pos), localPos);
-
     pos += localPos;
     if (static_cast<size_t>(expression.length()) <= pos || expression[pos] != ')')
     {
@@ -83,13 +89,7 @@ int64_t getToken(CStringView expression, size_t &pos)
     ++pos;
     return token;
   }
-  if (auto unary = getUnaryOperation(expression, pos))
-  {
-    size_t localPos;
-    int64_t result = getToken(expression.subspan(pos), localPos);
-    pos += localPos;
-    return unary->apply(result);
-  }
+
 
   // start parsing number
   size_t startNum = pos;
@@ -171,8 +171,11 @@ int64_t getExpressionImpl(CStringView expression, size_t &pos)
   return result;
 }
 
-int64_t getExpression(CStringView expression)
-{
+
+} // namespace
+
+
+int64_t HexCalcImplementation::eval(const std::string &expression) {
   size_t pos;
   int64_t result = getExpressionImpl(expression, pos);
   if (pos != static_cast<size_t>(expression.length()))
@@ -180,98 +183,4 @@ int64_t getExpression(CStringView expression)
     throw logic_error("Can't parse all expression"); // TODO: change
   }
   return result;
-}
-
-void toBinaryImpl(string& result, uint64_t val)
-{
-  if (val > 1)
-  {
-    toBinaryImpl(result, val / 2);
-    result.push_back('0' + (val % 2));
-  }
-  else if (val == 1)
-    result.push_back('1');
-}
-
-string toBinary(uint64_t val)
-{
-  if (val == 0)
-    return "0";
-  string result;
-  toBinaryImpl(result, val);
-  return result;
-}
-
-char intToHex(const uint64_t hexDigit)
-{
-  assert(hexDigit < 16);
-  return hexDigit < 10 ? '0' + hexDigit : 'A' + hexDigit - 10;
-}
-void toHexImpl(string& result, uint64_t val)
-{
-  if (val >= 16)
-  {
-    toHexImpl(result, val / 16);
-    result.push_back(intToHex(val % 16));
-  }
-  else if (val < 16)
-    result.push_back(intToHex(val));
-}
-
-string toHex(uint64_t val)
-{
-  if (val == 0)
-    return "0";
-  string result;
-  toHexImpl(result, val);
-  return result;
-}
-
-void toCharsImpl(string &result, uint64_t val)
-{
-  if (val >= 256)
-  {
-    toCharsImpl(result, val / 256);
-    result.push_back(static_cast<char>(val % 256));
-  }
-  else
-  {
-    result.push_back(static_cast<char>(val));
-  }
-}
-
-string toChars(uint64_t val)
-{
-  if (val == 0)
-    return "";
-  string result;
-  toCharsImpl(result, val);
-  return result;
-}
-
-} // namespace
-
-
-uint64_t HexCalcImpl::getUint64() const {
-  return static_cast<uint64_t>(result);
-}
-
-int64_t HexCalcImpl::getInt64() const {
-  return result;
-}
-
-string HexCalcImpl::getBinary() const {
-  return toBinary(static_cast<uint64_t>(result));
-}
-
-string HexCalcImpl::getHex() const {
-  return toHex(static_cast<uint64_t>(result));
-}
-
-string HexCalcImpl::getChars() const {
-  return toChars(static_cast<uint64_t>(result));
-}
-
-void HexCalcImpl::eval(const std::string &expression) {
-  result = getExpression(expression);
 }
