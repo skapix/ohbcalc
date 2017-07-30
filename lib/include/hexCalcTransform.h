@@ -6,6 +6,7 @@
 // Done in template way for future 32 and 16 bits calculating
 // and not only for cpp types
 // uint64_t
+// TODO: toOctal
 
 template <typename T>
 std::string toHex(T val, bool leadingZeroes = false)
