@@ -7,6 +7,12 @@
 
 using namespace std;
 
+struct InitConsole
+{
+  InitConsole() { initConsole(); }
+  ~InitConsole() { deinitConsole(); }
+};
+
 static bool isExitSequence(const string &str)
 {
   const set<string> exitSequence = {"q", "quit", "exit", "Exit"};
@@ -43,10 +49,13 @@ static string getLine()
 // TODO: add output settings
 // TODO: add history (up, down)
 
+
+
 int main(int argc, const char * argv[])
 {
+  InitConsole consoleInitializer;
+
   HexCalc calculator;
-  initConsole();
   string expression;
   while (true) {
     inputExpression();
@@ -72,7 +81,6 @@ int main(int argc, const char * argv[])
 
     }
   }
-
 
   return 0;
 }

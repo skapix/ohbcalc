@@ -115,20 +115,25 @@ TEST_F(HexCalcTest, precedence)
 
 TEST_F(HexCalcTest, correct_decoding)
 {
+  testEval("0i", 0);
   testEval("1010101010111i", 5463);
+  testEval("1010101010111b", 5463);
   testEval("1010101010111010101011110I", 22377822);
+  testEval("1010101010111010101011110B", 22377822);
   testEval("AAAAh", 0xAAAA);
   testEval("1234567890ABCDEFH", 1311768467294899695ull);
   testEval("0x11", 17);
   testEval("0xABCD", 0xABCD);
   testEval("25o", 21);
+  testEval("025", 21);
   testEval("253477o", 87871);
+  testEval("0253477", 87871);
 
 }
 
 TEST_F(HexCalcTest, mixing_types)
 {
-  testEval("10i+101i-1i", 6);
+  testEval("10i+101i-1b", 6);
   testEval("10h+101h-1h", 0x101 + 15);
   testEval("10i+2Fh-0x3", 46);
 }

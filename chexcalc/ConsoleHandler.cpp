@@ -23,42 +23,28 @@ int kbhit() {
 
 static termios oldT, newT;
 
-void initTermios(int echo)
+void initConsole()
 {
-  tcgetattr(0, &oldT); /* grab old terminal i/o settings */
-  newT = oldT; /* make new settings same as old settings */
-  newT.c_lflag &= ~ICANON; /* disable buffered i/o */
-  newT.c_lflag &= echo ? ECHO : ~ECHO; /* set echo mode */
-  tcsetattr(0, TCSANOW, &newT); /* use these new terminal i/o settings now */
+  tcgetattr(0, &oldT); /* save old terminal i/o settings */
+  tcgetattr(0, &newT); // 0 ~ stdin
+  newT.c_lflag &= ~ICANON;
+  newT.c_lflag &= ~ECHO;
+  tcsetattr(0, TCSANOW, &newT);
+  setbuf(stdin, NULL);
 }
 
-/* Restore old terminal i/o settings */
-void resetTermios(void)
-{
+
+void deinitConsole() {
   tcsetattr(0, TCSANOW, &oldT);
 }
 
-/* Read 1 character - echo defines echo mode */
-char getch_(int echo)
-{
-  char ch;
-  initTermios(echo);
-  ch = getchar();
-  resetTermios();
-  return ch;
-}
 
 /* Read 1 character without echo */
 char getch()
 {
-  return getch_(0);
+  return getchar();
 }
 
-/* Read 1 character with echo */
-char getche()
-{
-  return getch_(1);
-}
 
 ///////////////////////////
 ///////////////////////////
@@ -80,13 +66,6 @@ constexpr const int ch_backspace[] = {CHKEY_BACKSPACE};
 constexpr const int ch_delete[] = {CHKEY_DELETE};
 constexpr const int ch_endline[] = {CHKEY_ENDLINE};
 
-#define EQSIZEB(constv) (sizeof(constv) == AmountElements)
-template <int AmountElements>
-const int g_sz = EQSIZEB(ch_left) + EQSIZEB(ch_right) + EQSIZEB(ch_up) +
-                 EQSIZEB(ch_down) + EQSIZEB(ch_ctrlleft) + EQSIZEB(ch_ctrlright) +
-                 EQSIZEB(ch_pgup) + EQSIZEB(ch_pgdown) + EQSIZEB(ch_home) +
-                 EQSIZEB(ch_end) + EQSIZEB(ch_backspace) + EQSIZEB(ch_delete) +
-                 EQSIZEB(ch_endline);
 #define PTRSIZE(constv) make_pair(constv, sizeof(constv) / sizeof(constv[0]))
 constexpr const pair<const int*, int> g_allSpecial[] = {PTRSIZE(ch_left) , PTRSIZE(ch_right), PTRSIZE(ch_up),
                                   PTRSIZE(ch_down), PTRSIZE(ch_ctrlleft), PTRSIZE(ch_ctrlright),
@@ -376,7 +355,7 @@ void handleSpecialKey(const SpecialKey key) {
       g_expressionHistory.push_back(move(g_currentExpression));
       g_currentExpressionHistory = g_expressionHistory.end();
       g_currentPosition = g_currentExpression.begin();
-      
+
       putchar('\n');
       break;
     case SpecialKey::Undefined:
@@ -384,18 +363,4 @@ void handleSpecialKey(const SpecialKey key) {
       break;
   }
   return;
-}
-
-void initConsole()
-{
-  termios term;
-  tcgetattr(0, &term); // 0 ~ stdin
-  term.c_lflag &= ~ICANON;
-  tcsetattr(0, TCSANOW, &term);
-  setbuf(stdin, NULL);
-}
-
-
-void deinitConsole() {
-
 }

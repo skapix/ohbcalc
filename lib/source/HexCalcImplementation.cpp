@@ -48,9 +48,78 @@ int64_t tokenFromBase<16>(CStringView token)
   return result;
 }
 
-bool isHexDigit(char c)
+inline char lastIdentificator(CStringView expression)
 {
-  return isdigit(c) || (tolower(c) >= 'a' && tolower(c) <= 'f');
+  return tolower(expression.last(1)[0]);
+}
+
+int64_t getValue(CStringView expression, size_t &pos)
+{
+  auto isHex = [](CStringView &number)
+  {
+    if (number.length() > 2 && number[0] == '0' && tolower(number[1]) == 'x')
+    {
+      number = number.subspan(2);
+      return true;
+    }
+    if (lastIdentificator(number) == 'h')
+    {
+      number = number.subspan(0, number.length() - 1);
+      return true;
+    }
+    return false;
+  };
+
+  auto isBin = [](CStringView &number)
+  {
+    if (number.length() > 1 && (lastIdentificator(number) == 'b' || lastIdentificator(number) == 'i'))
+    {
+      number = number.subspan(0, number.length() - 1);
+      return true;
+    }
+    return false;
+  };
+
+  auto isOct = [](CStringView &number)
+  {
+    if (number.length() > 1 && number[0] == '0')
+    {
+      number = number.subspan(1);
+      return true;
+    }
+    if (number.length() > 1 && lastIdentificator(number) == 'o')
+    {
+      number = number.subspan(0, number.length() - 1);
+      return true;
+    }
+    return false;
+  };
+
+
+  for (pos = 0; pos < static_cast<size_t>(expression.length()) && isalnum(expression[pos]); ++pos)
+  {}
+
+  CStringView numberView = expression.subspan(0, pos);
+
+  if (numberView.empty())
+  {
+    // no data found
+    throw std::logic_error("Can't get token");
+  }
+
+  if (isHex(numberView))
+  {
+    return tokenFromBase<16>(numberView);
+  }
+  if (isBin(numberView))
+  {
+    return tokenFromBase<2>(numberView);
+  }
+  if (isOct(numberView))
+  {
+    return tokenFromBase<8>(numberView);
+  }
+  return tokenFromBase<10>(numberView);
 }
 
 int64_t getExpressionImpl(CStringView expression, size_t &pos);
@@ -58,9 +127,9 @@ int64_t getExpressionImpl(CStringView expression, size_t &pos);
 // pos is out argument
 int64_t getToken(CStringView expression, size_t &pos)
 {
+  size_t localPos;
   if (auto unary = getUnaryOperation(expression, pos))
   {
-    size_t localPos;
     int64_t result = getToken(expression.subspan(pos), localPos);
     pos += localPos;
     return unary->apply(result);
@@ -80,50 +149,9 @@ int64_t getToken(CStringView expression, size_t &pos)
   }
 
 
-  // start parsing number
-  size_t startNum = pos;
-  // workaround: we want to use 0x as hex prefix
-  bool forceHex = false;
-  if (expression.length() - pos > 2 && expression[pos] == '0' && tolower(expression[pos+1]) == 'x')
-  {
-    pos += 2;
-    startNum = pos;
-    forceHex = true;
-  }
-  for (;pos < static_cast<size_t>(expression.length()) && isHexDigit(expression[pos]); ++pos)
-  {}
-
-  if (startNum == pos)
-  {
-    // no digits found
-    throw std::logic_error("Can't get token");
-  }
-
-  if (forceHex)
-  {
-    return tokenFromBase<16>(expression.subspan(startNum, pos - startNum));
-  }
-
-  if (pos == static_cast<size_t>(expression.length()))
-  {
-    return tokenFromBase<10>(expression.subspan(startNum));
-  }
-
-  // check suffix
-
-  if (tolower(expression[pos]) == 'i')
-  {
-    return tokenFromBase<2>(expression.subspan(startNum, pos++ - startNum));
-  }
-  if (tolower(expression[pos]) == 'o')
-  {
-    return tokenFromBase<8>(expression.subspan(startNum, pos++ - startNum));
-  }
-  if (tolower(expression[pos]) == 'h')
-  {
-    return tokenFromBase<16>(expression.subspan(startNum, pos++ - startNum));
-  }
-  return tokenFromBase<10>(expression.subspan(startNum, pos - startNum));
+  int64_t result = getValue(expression.subspan(pos), localPos);
+  pos += localPos;
+  return result;
 }
 
 

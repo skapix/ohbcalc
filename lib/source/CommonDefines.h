@@ -11,4 +11,4 @@ using ArrayView = gsl::span<T>;
 
 size_t getFirstNonEmptySymbol(CStringView str);
 
-char getLastChar(CStringView str);
+char lastIdentificator(CStringView str);

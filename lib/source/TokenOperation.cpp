@@ -1,4 +1,5 @@
 #include "TokenOperation.h"
+#include "hexCalcException.h"
 #include <algorithm>
 #include <cmath>
 
@@ -22,6 +23,15 @@ int64_t expodential(int64_t a, int64_t b)
   return a;
 }
 
+int64_t checkForZero(int64_t val)
+{
+  if (!val)
+  {
+    throw HCException("Division by zero");
+  }
+  return val;
+}
+
 // Operations with different Associativity should have different precedence!
 const BinaryOperation binaryOperations[]
   {
@@ -31,8 +41,8 @@ const BinaryOperation binaryOperations[]
     BinaryOperation(Associativity::Left, 20, "+", [](int64_t a, int64_t b){ return a + b;}),
     BinaryOperation(Associativity::Left, 20, "-", [](int64_t a, int64_t b){ return a - b;}),
     BinaryOperation(Associativity::Left, 30, "*", [](int64_t a, int64_t b){ return a * b;}),
-    BinaryOperation(Associativity::Left, 30, "/", [](int64_t a, int64_t b){ return a / b;}),
-    BinaryOperation(Associativity::Left, 30, "%", [](int64_t a, int64_t b){ return a % b;}),
+    BinaryOperation(Associativity::Left, 30, "/", [](int64_t a, int64_t b){ return a / checkForZero(b);}),
+    BinaryOperation(Associativity::Left, 30, "%", [](int64_t a, int64_t b){ return a % checkForZero(b);}),
     BinaryOperation(Associativity::Left, 8, "||", [](int64_t a, int64_t b){ return a || b;}),
     BinaryOperation(Associativity::Left, 8, "|", [](int64_t a, int64_t b){ return a | b;}),
     BinaryOperation(Associativity::Left, 9, "^", [](int64_t a, int64_t b){ return a ^ b;}),

@@ -6,7 +6,7 @@ size_t getFirstNonEmptySymbol(CStringView str)
   return it - str.begin();
 }
 
-char getLastChar(CStringView str)
+char lastIdentificator(CStringView str)
 {
   assert(str.length() && "Unexpected to be empty");
   return str[str.length() -1];

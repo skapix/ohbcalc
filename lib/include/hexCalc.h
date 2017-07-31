@@ -2,6 +2,8 @@
 
 #include <memory>
 
+class HCException;
+
 class HexCalcImplementation;
 
 class HexCalc
