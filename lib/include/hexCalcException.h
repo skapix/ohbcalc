@@ -9,10 +9,6 @@ public:
     : pos(position)
     , message(message)
   {}
-  HCException(const std::string &message)
-    : pos(-1)
-    , message(message)
-  {}
 
   virtual const char*what() const noexcept override
   {

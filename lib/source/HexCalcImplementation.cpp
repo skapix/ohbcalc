@@ -1,33 +1,59 @@
 #include "HexCalcImplementation.h"
+#include "hexCalcException.h"
 #include "CommonDefines.h"
 #include "TokenOperation.h"
 
 using namespace std;
+
+struct PositionMover
+{
+  PositionMover(size_t &posToMove, const size_t &posToAdd)
+  : m_disable(false)
+   , m_dest(posToMove)
+  , m_src(posToAdd)
+  {}
+  void disable() {m_disable = true;}
+  ~PositionMover()
+  {
+    if (!m_disable)
+    {
+      m_dest += m_src;
+    }
+  }
+
+private:
+  bool m_disable;
+  size_t &m_dest;
+  const size_t &m_src;
+};
 
 namespace
 {
 
 // base <= 10
 template <int Base>
-int64_t tokenFromBase(CStringView token)
+int64_t tokenFromBase(CStringView token, size_t &pos)
 {
   assert(Base <= 10 && "Wrong usage");
+  pos = 0;
   int64_t result = 0;
   for (auto item : token)
   {
     if (item < '0' || item >= '0' + Base)
     {
-      throw logic_error(string("Can't decode character ") + to_string(item) +  " in base " + to_string(Base));
+      throw logic_error(string("Can't decode character ") + std::string(1, item) +  " in base " + to_string(Base));
     }
     result *= Base;
     result += item - '0';
+    ++pos;
   }
   return result;
 }
 
 template <>
-int64_t tokenFromBase<16>(CStringView token)
+int64_t tokenFromBase<16>(CStringView token, size_t &pos)
 {
+  pos = 0;
   int64_t result = 0;
   for (auto item : token)
   {
@@ -42,8 +68,9 @@ int64_t tokenFromBase<16>(CStringView token)
     }
     else
     {
-      throw logic_error(string("Can't decode character ") + to_string(item) +  " in base 16");
+      throw HCException(pos, string("Can't decode character ") + std::string(1, item) +  " in base 16");
     }
+    ++pos;
   }
   return result;
 }
@@ -55,10 +82,15 @@ inline char lastIdentificator(CStringView expression)
 
 int64_t getValue(CStringView expression, size_t &pos)
 {
-  auto isHex = [](CStringView &number)
+  //
+  size_t localPos = 0;
+  auto mover = PositionMover(pos, localPos);
+
+  auto isHex = [&localPos](CStringView &number)
   {
     if (number.length() > 2 && number[0] == '0' && tolower(number[1]) == 'x')
     {
+      localPos = 2;
       number = number.subspan(2);
       return true;
     }
@@ -70,7 +102,7 @@ int64_t getValue(CStringView expression, size_t &pos)
     return false;
   };
 
-  auto isBin = [](CStringView &number)
+  auto isBin = [&localPos](CStringView &number)
   {
     if (number.length() > 1 && (lastIdentificator(number) == 'b' || lastIdentificator(number) == 'i'))
     {
@@ -80,10 +112,11 @@ int64_t getValue(CStringView expression, size_t &pos)
     return false;
   };
 
-  auto isOct = [](CStringView &number)
+  auto isOct = [&localPos](CStringView &number)
   {
     if (number.length() > 1 && number[0] == '0')
     {
+      localPos = 1;
       number = number.subspan(1);
       return true;
     }
@@ -95,11 +128,11 @@ int64_t getValue(CStringView expression, size_t &pos)
     return false;
   };
 
-
-  for (pos = 0; pos < static_cast<size_t>(expression.length()) && isalnum(expression[pos]); ++pos)
+  size_t idenSz = 0;
+  for (; idenSz < static_cast<size_t>(expression.length()) && isalnum(expression[idenSz]); ++idenSz)
   {}
 
-  CStringView numberView = expression.subspan(0, pos);
+  CStringView numberView = expression.subspan(0, idenSz);
 
   if (numberView.empty())
   {
@@ -109,17 +142,25 @@ int64_t getValue(CStringView expression, size_t &pos)
 
   if (isHex(numberView))
   {
-    return tokenFromBase<16>(numberView);
+    int64_t result = tokenFromBase<16>(numberView, pos);
+    // add suffix position. Note that every number in special base has
+    // a suffix if it has no prefix
+    pos += localPos == 0;
+    return result;
   }
   if (isBin(numberView))
   {
-    return tokenFromBase<2>(numberView);
+    int64_t result = tokenFromBase<2>(numberView, pos);
+    pos += localPos == 0;
+    return result;
   }
   if (isOct(numberView))
   {
-    return tokenFromBase<8>(numberView);
+    int64_t result = tokenFromBase<8>(numberView, pos);
+    pos += localPos == 0;
+    return result;
   }
-  return tokenFromBase<10>(numberView);
+  return tokenFromBase<10>(numberView, pos);
 }
 
 int64_t getExpressionImpl(CStringView expression, size_t &pos);
@@ -127,17 +168,21 @@ int64_t getExpressionImpl(CStringView expression, size_t &pos);
 // pos is out argument
 int64_t getToken(CStringView expression, size_t &pos)
 {
-  size_t localPos;
+  size_t localPos = 0;
+  auto mover = PositionMover(pos, localPos);
+
   if (auto unary = getUnaryOperation(expression, pos))
   {
     int64_t result = getToken(expression.subspan(pos), localPos);
-    pos += localPos;
     return unary->apply(result);
+  }
+  if (static_cast<size_t>(expression.length()) == pos)
+  {
+    throw logic_error("Unexpected end of statement");
   }
 
   if (expression[pos] == '(')
   {
-    size_t localPos;
     int64_t token = getExpressionImpl(expression.subspan(++pos), localPos);
     pos += localPos;
     if (static_cast<size_t>(expression.length()) <= pos || expression[pos] != ')')
@@ -145,12 +190,13 @@ int64_t getToken(CStringView expression, size_t &pos)
       throw logic_error("Unexpected symbol. Expected ')'");
     }
     ++pos;
+    mover.disable();
     return token;
   }
 
 
+  // can throw
   int64_t result = getValue(expression.subspan(pos), localPos);
-  pos += localPos;
   return result;
 }
 
@@ -190,8 +236,10 @@ int64_t getExpressionImpl(const int64_t arg1, const BinaryOperation *operation, 
 int64_t getExpressionImpl(CStringView expression, size_t &pos)
 {
   size_t localPos = 0;
-  int64_t arg1 = getToken(expression, pos);
-  expression = expression.subspan(pos);
+  auto mover = PositionMover(pos, localPos);
+  int64_t arg1 = getToken(expression, localPos);
+  pos += localPos;
+  expression = expression.subspan(localPos);
 
   auto op =  getBinaryOperation(expression, localPos);
   expression = expression.subspan(localPos);
@@ -199,11 +247,11 @@ int64_t getExpressionImpl(CStringView expression, size_t &pos)
   if (op == nullptr)
   {
     // we reached end of expression
+    mover.disable();
     return arg1;
   }
 
   int64_t result = getExpressionImpl(arg1, op, expression, localPos);
-  pos += localPos;
   return result;
 }
 
@@ -212,11 +260,23 @@ int64_t getExpressionImpl(CStringView expression, size_t &pos)
 
 
 int64_t HexCalcImplementation::eval(const std::string &expression) {
-  size_t pos;
-  int64_t result = getExpressionImpl(expression, pos);
+  size_t pos = 0;
+  int64_t result;
+  try
+  {
+    result = getExpressionImpl(expression, pos);
+  }
+  catch (const exception& exc)
+  {
+    // rethrow
+    throw HCException(pos, exc.what());
+  }
   if (pos != static_cast<size_t>(expression.length()))
   {
-    throw logic_error(string("Can't parse all expression, stopped at position ") + std::to_string(pos));
+    throw HCException(pos, string("Can't parse all expression, stopped at position ") + std::to_string(pos));
   }
   return result;
+
+
+//  return result;
 }

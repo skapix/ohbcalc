@@ -1,4 +1,5 @@
 #include "hexCalc.h"
+#include "hexCalcException.h"
 #include <gtest/gtest.h>
 
 using namespace std;
@@ -14,6 +15,21 @@ protected:
     const string trace = string("Calculating ") + expression;
     SCOPED_TRACE(trace.c_str());
     EXPECT_EQ(calculator.eval(expression), result);
+  }
+
+  void testPositionAtError(const string &expression, size_t pos)
+  {
+    const string trace = string("Catching error from: ") + expression;
+    SCOPED_TRACE(trace.c_str());
+    try {
+      calculator.eval(expression);
+      GTEST_FAIL();
+    }
+    catch (const HCException& error)
+    {
+      ASSERT_EQ(error.getPos(), pos);
+    }
+
   }
 };
 
@@ -145,4 +161,32 @@ TEST_F(HexCalcTest, recurse_brackets)
 
   testEval("3 * (((2 - 3) + 4 * 5) / 2 ) - 4 * (1 + 2 * (-1 + 1i) )", 27 - 4);
   testEval("(AH ^ (0x5F - 1010111i)) * (17o + (24h-24)*11i)", 102);
+}
+
+
+TEST_F(HexCalcTest, parse_number)
+{
+  testPositionAtError("12k4", 2);
+  testPositionAtError("1234q", 4);
+  testPositionAtError("z1", 0);
+  testPositionAtError("101012i", 5);
+  testPositionAtError("1FBGCh", 3);
+  testPositionAtError("1234F", 4);
+  testPositionAtError("012348", 5);
+  testPositionAtError("0x012L48", 5);
+
+  testPositionAtError("123 + 2q6", 7);
+  testPositionAtError("123h + 2q6", 8);
+}
+
+TEST_F(HexCalcTest, unknown_op)
+{
+  testPositionAtError("123h # 123", 5);
+  testPositionAtError("123h 8 123", 5);
+  testPositionAtError("123h?123", 4);
+}
+
+TEST_F(HexCalcTest, unfinished)
+{
+  testPositionAtError("123h + ", 7);
 }

@@ -27,7 +27,7 @@ int64_t checkForZero(int64_t val)
 {
   if (!val)
   {
-    throw HCException("Division by zero");
+    throw logic_error("Division by zero");
   }
   return val;
 }
