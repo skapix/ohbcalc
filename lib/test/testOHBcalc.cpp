@@ -180,6 +180,9 @@ TEST_F(HexCalcTest, parse_number)
   testPositionAtError("123op", 4);
   testPositionAtError("123op1", 3);
   testPositionAtError("(123+(456+234*(123+123q)))", 22);
+  testPositionAtError("(123+456+67q8)", 11);
+  testPositionAtError("(123+45f6+678)", 7);
+  testPositionAtError("1+t2", 2);
 
 }
 
@@ -195,7 +198,10 @@ TEST_F(HexCalcTest, unfinished)
   testPositionAtError("123h + ", 7);
 }
 
-TEST_F(HexCalcTest, DISABLED_divizion_by_zero)
+TEST_F(HexCalcTest, divizion_by_zero)
 {
   testPositionAtError("1/0", 1);
+  testPositionAtError("2+1/(4-2*2)", 3);
+  testPositionAtError("(2+1)/(4-2*2)", 5);
+  testPositionAtError("2*(4/(2-2)", 4);
 }

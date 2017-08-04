@@ -82,7 +82,7 @@ inline char lastIdentificator(CStringView expression)
 
 int64_t getValue(CStringView expression, size_t &pos)
 {
-  //
+  pos = 0;
   size_t localPos = 0;
   auto mover = PositionMover(pos, localPos);
 
@@ -137,7 +137,7 @@ int64_t getValue(CStringView expression, size_t &pos)
   if (numberView.empty())
   {
     // no data found
-    throw std::logic_error("Can't get token");
+    throw std::logic_error("Can't get identificator");
   }
 
   if (isHex(numberView))
@@ -173,6 +173,7 @@ int64_t getExpressionImpl(CStringView expression, size_t &pos);
 // pos is out argument
 int64_t getToken(CStringView expression, size_t &pos)
 {
+  pos = 0;
   size_t localPos = 0;
   auto mover = PositionMover(pos, localPos);
 
@@ -206,40 +207,63 @@ int64_t getToken(CStringView expression, size_t &pos)
 }
 
 
-int64_t getExpressionImpl(const int64_t arg1, const BinaryOperation *operation, CStringView expression,
+
+int64_t getExpressionImpl(const int64_t arg1, const BinaryOperation &operation, CStringView expression,
                           size_t &pos)
 {
+  pos = 0;
   size_t localPos = 0;
   auto mover = PositionMover(pos, localPos);
+  size_t savedPos = static_cast<size_t>(-operation.getRepresentation().size());
+
+  auto binaryOpWrapper = [&](const BinaryOperation &op, int64_t arg2) -> int64_t
+  {
+    try
+    {
+      return op.apply(arg1, arg2);
+    }
+    catch (const OperationException &operationEx)
+    {
+      mover.disable();
+      pos = savedPos;
+      throw std::logic_error(operationEx.what());
+    }
+  };
+
+
   const int64_t arg2 = getToken(expression, pos);
   expression = expression.subspan(pos);
+
+
   auto nextOperation = getBinaryOperation(expression, localPos);
   expression = expression.subspan(localPos);
 
   if (nextOperation == nullptr)
   {
-    // we reached end of expression
-    return operation->apply(arg1, arg2);
+    // we reached the end of expression
+    return binaryOpWrapper(operation, arg2);
   }
   pos += localPos;
+  savedPos = pos;
 
-  const int operationPrecedence = operation->getPrecedence();
+  const int operationPrecedence = operation.getPrecedence();
   const int nextOperationPrecedence = nextOperation->getPrecedence();
   if (operationPrecedence > nextOperationPrecedence ||
     (operationPrecedence == nextOperationPrecedence &&
       nextOperation->getAssociativity() == Associativity::Left))
   {
-    int64_t newArg = operation->apply(arg1, arg2);
-    int64_t result = getExpressionImpl(newArg, nextOperation, expression, localPos);
+    int64_t newArg = binaryOpWrapper(operation, arg2);
+    int64_t result = getExpressionImpl(newArg, *nextOperation, expression, localPos);
     return result;
   }
 
-  int64_t newArg = getExpressionImpl(arg2, nextOperation, expression, localPos);
-  return operation->apply(arg1, newArg);
+  int64_t newArg = getExpressionImpl(arg2, *nextOperation, expression, localPos);
+  return binaryOpWrapper(operation, newArg);
 }
 
 int64_t getExpressionImpl(CStringView expression, size_t &pos)
 {
+  pos = 0;
   size_t localPos = 0;
   auto mover = PositionMover(pos, localPos);
   int64_t arg1 = getToken(expression, localPos);
@@ -256,8 +280,7 @@ int64_t getExpressionImpl(CStringView expression, size_t &pos)
     return arg1;
   }
 
-  int64_t result = getExpressionImpl(arg1, op, expression, localPos);
-  return result;
+  return getExpressionImpl(arg1, *op, expression, localPos);
 }
 
 

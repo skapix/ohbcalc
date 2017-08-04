@@ -52,3 +52,19 @@ constexpr ArrayView<const BinaryOperation> getOperations();
 
 const BinaryOperation *getBinaryOperation(const CStringView str, size_t &endOperator);
 const UnaryOperation *getUnaryOperation(const CStringView str, size_t &endOperator);
+
+class OperationException : public std::exception
+{
+public:
+  OperationException(const std::string &error)
+    : m_error(error)
+  {}
+
+  virtual const char *what() const noexcept override
+  {
+    return m_error.c_str();
+  }
+
+private:
+  std::string m_error;
+};
