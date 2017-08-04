@@ -2,8 +2,6 @@
 
 #include <memory>
 
-class OHBexception;
-
 class OHBCalcImpl;
 
 class OHBCalc

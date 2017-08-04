@@ -160,6 +160,11 @@ int64_t getValue(CStringView expression, size_t &pos)
     pos += localPos == 0;
     return result;
   }
+  if (!isdigit(lastIdentificator(numberView)))
+  {
+    pos += numberView.size() - 1;
+    throw logic_error(string("Unknown suffix ") + string(1, lastIdentificator(numberView)));
+  }
   return tokenFromBase<10>(numberView, pos);
 }
 

@@ -1,5 +1,6 @@
 #include "ohbcalc.h"
 #include "ohbTransform.h"
+#include "ohbException.h"
 #include "ConsoleHandler.h"
 
 #include <iostream>
@@ -19,9 +20,10 @@ static bool isExitSequence(const string &str)
   return exitSequence.find(str) != exitSequence.end();
 }
 
+const static string g_inputExpression = "> ";
 static void inputExpression()
 {
-  cout << "> ";
+  cout << g_inputExpression;
 }
 
 
@@ -74,9 +76,14 @@ int main(int argc, const char * argv[])
       cout << "h: " << toHex(result) << endl;
       cout << "i: " << toBinary(result) << endl;
     }
+    catch (const OHBException &expr)
+    {
+      markError(expr.getPos() + g_inputExpression.size());
+      cout << expr.what() << endl;
+    }
     catch (const exception &expr) // TODO: change exception type; TODO: fix zero exception
     {
-
+      cout << expr.what() << endl;
     }
   }
 

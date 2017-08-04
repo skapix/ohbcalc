@@ -177,6 +177,9 @@ TEST_F(HexCalcTest, parse_number)
 
   testPositionAtError("123 + 2q6", 7);
   testPositionAtError("123h + 2q6", 8);
+  testPositionAtError("123op", 4);
+  testPositionAtError("123op1", 3);
+
 }
 
 TEST_F(HexCalcTest, unknown_op)
@@ -189,4 +192,9 @@ TEST_F(HexCalcTest, unknown_op)
 TEST_F(HexCalcTest, unfinished)
 {
   testPositionAtError("123h + ", 7);
+}
+
+TEST_F(HexCalcTest, DISABLED_divizion_by_zero)
+{
+  testPositionAtError("1/0", 1);
 }

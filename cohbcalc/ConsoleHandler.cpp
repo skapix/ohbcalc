@@ -355,5 +355,13 @@ void handleSpecialKey(const SpecialKey key) {
       // do nothing
       break;
   }
-  return;
+}
+
+void markError(size_t pos) {
+  for (size_t i = 0; i < pos; ++i)
+  {
+    putchar(' ');
+  }
+  putchar('^');
+  putchar('\n');
 }
