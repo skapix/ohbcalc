@@ -210,16 +210,18 @@ int64_t getExpressionImpl(const int64_t arg1, const BinaryOperation *operation, 
                           size_t &pos)
 {
   size_t localPos = 0;
+  auto mover = PositionMover(pos, localPos);
   const int64_t arg2 = getToken(expression, pos);
   expression = expression.subspan(pos);
   auto nextOperation = getBinaryOperation(expression, localPos);
   expression = expression.subspan(localPos);
-  pos += localPos;
+
   if (nextOperation == nullptr)
   {
     // we reached end of expression
     return operation->apply(arg1, arg2);
   }
+  pos += localPos;
 
   const int operationPrecedence = operation->getPrecedence();
   const int nextOperationPrecedence = nextOperation->getPrecedence();
@@ -229,12 +231,10 @@ int64_t getExpressionImpl(const int64_t arg1, const BinaryOperation *operation, 
   {
     int64_t newArg = operation->apply(arg1, arg2);
     int64_t result = getExpressionImpl(newArg, nextOperation, expression, localPos);
-    pos += localPos;
     return result;
   }
 
   int64_t newArg = getExpressionImpl(arg2, nextOperation, expression, localPos);
-  pos += localPos;
   return operation->apply(arg1, newArg);
 }
 
@@ -281,7 +281,4 @@ int64_t OHBCalcImpl::eval(const std::string &expression) {
     throw OHBException(pos, string("Can't parse all expression, stopped at position ") + std::to_string(pos));
   }
   return result;
-
-
-//  return result;
 }

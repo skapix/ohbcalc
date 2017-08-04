@@ -179,6 +179,7 @@ TEST_F(HexCalcTest, parse_number)
   testPositionAtError("123h + 2q6", 8);
   testPositionAtError("123op", 4);
   testPositionAtError("123op1", 3);
+  testPositionAtError("(123+(456+234*(123+123q)))", 22);
 
 }
 
