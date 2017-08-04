@@ -1,5 +1,6 @@
 #include "ConsoleHandler.h"
 #include "KeyBindings.h"
+#include "ExpressionHistory.h"
 
 #include <iostream>
 #include <map>
@@ -206,8 +207,7 @@ Character readChar()
 
 
 // TODO: don't memorize empty expressions
-list<string> g_expressionHistory;
-list<string>::iterator g_currentExpressionHistory = g_expressionHistory.end();
+ExpressionHistory g_expressionHistory;
 string g_currentExpression;
 string::iterator g_currentPosition = g_currentExpression.begin();
 
@@ -229,15 +229,25 @@ void handleChar(char c)
 
 string getExpression()
 {
-  return g_expressionHistory.back();
+  if (!all_of(g_currentExpression.begin(), g_currentExpression.end(),
+              [](char c){
+                return std::isspace(c); }))
+  {
+    g_expressionHistory.push_back(g_currentExpression);
+  }
+  string result = std::move(g_currentExpression);
+
+  g_currentExpression.clear(); // just in case
+  g_currentPosition = g_currentExpression.begin();
+  return result;
 }
 
 void updateStringView()
 {
   handleSpecialKey(SpecialKey::Home);
-  bool endHistory = g_currentExpressionHistory == g_expressionHistory.end();
+  bool endHistory = g_expressionHistory.getElement() == nullptr;
 
-  size_t szNew = endHistory ? 0 : g_currentExpressionHistory->size();
+  size_t szNew = endHistory ? 0 : g_expressionHistory.getElement()->size();
 
 
   while (g_currentExpression.size() > szNew)
@@ -251,13 +261,8 @@ void updateStringView()
   }
   // else write content of history
 
-
-  g_currentExpression = *g_currentExpressionHistory;
-  // TODO: replace with puts && check
-  for (auto c : g_currentExpression)
-  {
-    putchar(c);
-  }
+  g_currentExpression = *g_expressionHistory.getElement();
+  fputs(g_currentExpression.c_str(), stdout);
   g_currentPosition = g_currentExpression.end();
 }
 
@@ -266,28 +271,20 @@ const int g_pgCount = 5;
 void handleSpecialKey(const SpecialKey key) {
   switch (key) {
     case SpecialKey::Up:
-      if (g_currentExpressionHistory != g_expressionHistory.begin()) {
-        g_currentExpressionHistory = std::prev(g_currentExpressionHistory);
-        updateStringView();
-      }
+      g_expressionHistory.getElement(-1);
+      updateStringView();
       break;
     case SpecialKey::Down:
-      if (g_currentExpressionHistory != g_expressionHistory.end()) {
-        g_currentExpressionHistory = std::next(g_currentExpressionHistory);
-        updateStringView();
-      }
+      g_expressionHistory.getElement(1);
+      updateStringView();
       break;
     case SpecialKey::PageUp:
-      for (int i = 0; i < g_pgCount && g_currentExpressionHistory != g_expressionHistory.begin(); ++i)
-      {
-        handleSpecialKey(SpecialKey::Up);
-      }
+      g_expressionHistory.getElement(-g_pgCount);
+      updateStringView();
       break;
     case SpecialKey::PageDown:
-      for (int i = 0; i < g_pgCount && g_currentExpressionHistory != g_expressionHistory.end(); ++i)
-      {
-        handleSpecialKey(SpecialKey::Down);
-      }
+      g_expressionHistory.getElement(g_pgCount);
+      updateStringView();
       break;
     case SpecialKey::Left:
       if (g_currentPosition != g_currentExpression.begin())
@@ -352,10 +349,6 @@ void handleSpecialKey(const SpecialKey key) {
       }
       break;
     case SpecialKey::EndLine:
-      g_expressionHistory.push_back(move(g_currentExpression));
-      g_currentExpressionHistory = g_expressionHistory.end();
-      g_currentPosition = g_currentExpression.begin();
-
       putchar('\n');
       break;
     case SpecialKey::Undefined:

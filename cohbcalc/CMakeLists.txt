@@ -10,7 +10,7 @@ endif()
 
 project(cohbcalc)
 
-set(sources ${CMAKE_CURRENT_SOURCE_DIR}/ohbcalc.cpp ConsoleHandler.cpp ConsoleHandler.h KeyBindings.h)
+set(sources ${CMAKE_CURRENT_SOURCE_DIR}/cohbcalc.cpp ConsoleHandler.cpp ConsoleHandler.h KeyBindings.h ExpressionHistory.cpp ExpressionHistory.h)
 
 add_executable(cohbcalc ${sources})
 

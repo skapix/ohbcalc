@@ -47,8 +47,6 @@ static string getLine()
 
 // TODO: add arg: calculate and exit
 // TODO: add output settings
-// TODO: add history (up, down)
-
 
 
 int main(int argc, const char * argv[])

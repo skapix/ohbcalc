@@ -32,4 +32,5 @@ void deinitConsole();
 
 void handleSpecialKey(const SpecialKey key);
 void handleChar(char c);
+// function must be called after readChar return '\n'
 std::string getExpression();
