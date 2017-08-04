@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(HexCalcLib)
+project(ohbcalc)
 set(GSL_TEST_DIR ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY})
 set(GSL_TEST_FILE ${GSL_TEST_DIR}/gsl-test.cpp)
 
@@ -20,7 +20,7 @@ int main() {
 try_compile(GSL_COMPILED ${GSL_TEST_DIR} SOURCES ${GSL_TEST_FILE}
     COMPILE_DEFINITIONS -I${GSL_INCLUDE_DIR})
 #
-# Project has a GSL dependency. if HexCalcLib can not be compiled =>
+# Project has a GSL dependency. if OHBCalcLib can not be compiled =>
 # we should download project from git repository
 if (NOT GSL_COMPILED)
 	message(STATUS "GSL was not found in system. Start downloading it.")
@@ -46,11 +46,14 @@ if (NOT GSL_COMPILED)
 	message(STATUS "GSL was successfully downloaded")
 endif(NOT GSL_COMPILED)
 
-set(sources source/HexCalcLib.cpp source/HexCalcImplementation.cpp source/HexCalcImplementation.h test/testHexCalcLib.cpp source/TokenOperation.cpp source/TokenOperation.h source/CommonDefines.h source/CommonDefines.cpp include/hexCalcTransform.h include/transformImpl/TransformImpl.h include/hexCalcException.h)
+set(sources source/OHBCalcLib.cpp source/OHBCalcImpl.cpp source/OHBCalcImpl.h
+		test/testOHBcalc.cpp source/TokenOperation.cpp source/TokenOperation.h source/CommonDefines.h
+		source/CommonDefines.cpp include/ohbTransform.h include/transformImpl/TransformImpl.h
+		include/ohbException.h include/ohbcalc.h)
 
-add_library(HexCalcLib ${sources})
-target_include_directories(HexCalcLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_include_directories(HexCalcLib PRIVATE ${GSL_INCLUDE_DIR})
+add_library(ohbcalc ${sources})
+target_include_directories(ohbcalc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(ohbcalc PRIVATE ${GSL_INCLUDE_DIR})
 
 
 ## Testing

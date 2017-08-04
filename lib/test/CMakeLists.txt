@@ -6,8 +6,8 @@ endif(NOT ${GTest_FOUND})
 
 enable_testing()
 
-set(test_source ${CMAKE_CURRENT_SOURCE_DIR}/testHexCalcLib.cpp testTransforms.cpp)
-add_executable(HexCalcTest ${test_source})
-target_link_libraries(HexCalcTest GTest::GTest GTest::Main HexCalcLib)
+set(test_source ${CMAKE_CURRENT_SOURCE_DIR}/testOHBcalc.cpp testTransforms.cpp)
+add_executable(ohbcalcTest ${test_source})
+target_link_libraries(ohbcalcTest GTest::GTest GTest::Main ohbcalc)
 
-add_test(NAME HexCalcTesting COMMAND HexCalcTest)
+add_test(NAME ohbcalcTesting COMMAND ohbcalcTest)

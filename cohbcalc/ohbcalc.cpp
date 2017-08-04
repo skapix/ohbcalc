@@ -1,5 +1,5 @@
-#include "hexCalc.h"
-#include "hexCalcTransform.h"
+#include "ohbcalc.h"
+#include "ohbTransform.h"
 #include "ConsoleHandler.h"
 
 #include <iostream>
@@ -55,7 +55,7 @@ int main(int argc, const char * argv[])
 {
   InitConsole consoleInitializer;
 
-  HexCalc calculator;
+  OHBCalc calculator;
   string expression;
   while (true) {
     inputExpression();

@@ -4,10 +4,10 @@
 #include <string>
 
 
-class HexCalcImplementation {
+class OHBCalcImpl {
 public:
-  HexCalcImplementation() = default;
-  ~HexCalcImplementation() = default;
+  OHBCalcImpl() = default;
+  ~OHBCalcImpl() = default;
   int64_t eval(const std::string &expression);
 
 private:

@@ -1,5 +1,5 @@
-#include "HexCalcImplementation.h"
-#include "hexCalcException.h"
+#include "OHBCalcImpl.h"
+#include "ohbException.h"
 #include "CommonDefines.h"
 #include "TokenOperation.h"
 
@@ -68,7 +68,7 @@ int64_t tokenFromBase<16>(CStringView token, size_t &pos)
     }
     else
     {
-      throw HCException(pos, string("Can't decode character ") + std::string(1, item) +  " in base 16");
+      throw OHBException(pos, string("Can't decode character ") + std::string(1, item) +  " in base 16");
     }
     ++pos;
   }
@@ -259,7 +259,7 @@ int64_t getExpressionImpl(CStringView expression, size_t &pos)
 } // namespace
 
 
-int64_t HexCalcImplementation::eval(const std::string &expression) {
+int64_t OHBCalcImpl::eval(const std::string &expression) {
   size_t pos = 0;
   int64_t result;
   try
@@ -269,11 +269,11 @@ int64_t HexCalcImplementation::eval(const std::string &expression) {
   catch (const exception& exc)
   {
     // rethrow
-    throw HCException(pos, exc.what());
+    throw OHBException(pos, exc.what());
   }
   if (pos != static_cast<size_t>(expression.length()))
   {
-    throw HCException(pos, string("Can't parse all expression, stopped at position ") + std::to_string(pos));
+    throw OHBException(pos, string("Can't parse all expression, stopped at position ") + std::to_string(pos));
   }
   return result;
 

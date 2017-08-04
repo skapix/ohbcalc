@@ -2,10 +2,10 @@
 
 #include <string>
 
-class HCException : public std::exception
+class OHBException : public std::exception
 {
 public:
-  HCException(size_t position, const std::string &message)
+  OHBException(size_t position, const std::string &message)
     : pos(position)
     , message(message)
   {}

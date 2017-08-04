@@ -1,5 +1,5 @@
-#include "hexCalc.h"
-#include "hexCalcException.h"
+#include "ohbcalc.h"
+#include "ohbException.h"
 #include <gtest/gtest.h>
 
 using namespace std;
@@ -8,7 +8,7 @@ using namespace std;
 class HexCalcTest : public ::testing::Test
 {
 protected:
-  HexCalc calculator;
+  OHBCalc calculator;
 
   void testEval(const string &expression, int64_t result)
   {
@@ -25,7 +25,7 @@ protected:
       calculator.eval(expression);
       GTEST_FAIL();
     }
-    catch (const HCException& error)
+    catch (const OHBException& error)
     {
       ASSERT_EQ(error.getPos(), pos);
     }

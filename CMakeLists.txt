@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(HexCalc)
+project(ohbcalc)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -20,4 +20,4 @@ endif()
 
 
 add_subdirectory(lib)
-add_subdirectory(chexcalc)
+add_subdirectory(cohbcalc)
