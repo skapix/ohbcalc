@@ -156,6 +156,7 @@ TEST_F(HexCalcTest, mixing_types)
 
 TEST_F(HexCalcTest, recurse_brackets)
 {
+  testEval("(((4)))", 4);
   testEval("3 * (((2 - 3) + 4 * 5) / 2 + 3) ", 36);
   testEval("(1000i + 11o) & ( E0h + 0xE)", 0);
 
@@ -204,4 +205,13 @@ TEST_F(HexCalcTest, divizion_by_zero)
   testPositionAtError("2+1/(4-2*2)", 3);
   testPositionAtError("(2+1)/(4-2*2)", 5);
   testPositionAtError("2*(4/(2-2)", 4);
+}
+
+
+TEST_F(HexCalcTest, wrong_brackets)
+{
+  testPositionAtError("()", 1);
+  testPositionAtError("((1)", 4);
+  testPositionAtError("(1))", 3);
+  testPositionAtError("(2+)3", 3);
 }

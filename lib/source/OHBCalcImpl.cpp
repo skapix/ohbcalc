@@ -191,12 +191,12 @@ int64_t getToken(CStringView expression, size_t &pos)
   {
     int64_t token = getExpressionImpl(expression.subspan(++pos), localPos);
     pos += localPos;
+    mover.disable();
     if (static_cast<size_t>(expression.length()) <= pos || expression[pos] != ')')
     {
       throw logic_error("Unexpected symbol. Expected ')'");
     }
     ++pos;
-    mover.disable();
     return token;
   }
 
