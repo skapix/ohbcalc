@@ -5,7 +5,7 @@
 using namespace std;
 // TODO: test on big-endian machine
 
-class HexCalcTest : public ::testing::Test
+class OHBCalcTest : public ::testing::Test
 {
 protected:
   OHBCalc calculator;
@@ -17,24 +17,10 @@ protected:
     EXPECT_EQ(calculator.eval(expression), result);
   }
 
-  void testPositionAtError(const string &expression, size_t pos)
-  {
-    const string trace = string("Catching error from: ") + expression;
-    SCOPED_TRACE(trace.c_str());
-    try {
-      calculator.eval(expression);
-      GTEST_FAIL();
-    }
-    catch (const OHBException& error)
-    {
-      ASSERT_EQ(error.getPos(), pos);
-    }
-
-  }
 };
 
 
-TEST_F(HexCalcTest, solo_number)
+TEST_F(OHBCalcTest, solo_number)
 {
   testEval("3", 3);
   testEval("243", 243);
@@ -43,7 +29,7 @@ TEST_F(HexCalcTest, solo_number)
 
 }
 
-TEST_F(HexCalcTest, with_unary_operator)
+TEST_F(OHBCalcTest, with_unary_operator)
 {
   testEval("-5", -5);
   testEval("(-10)", -10);
@@ -53,20 +39,20 @@ TEST_F(HexCalcTest, with_unary_operator)
   testEval("!0", 1);
 }
 
-TEST_F(HexCalcTest, skip_spaces)
+TEST_F(OHBCalcTest, skip_spaces)
 {
   testEval("  (  1     ) ", 1);
   testEval("(  1   + 2   )", 3);
   testEval("  1   + 2   ", 3);
 }
 
-TEST_F(HexCalcTest, many_unary_operators)
+TEST_F(OHBCalcTest, many_unary_operators)
 {
   testEval("3---------3", 0);
   testEval("--3---~--~--3", 0);
 }
 
-TEST_F(HexCalcTest, all_operations)
+TEST_F(OHBCalcTest, all_operations)
 {
   testEval("19 << 2", 19 << 2);
   testEval("1094 << 5", 1094 << 5);
@@ -111,7 +97,7 @@ TEST_F(HexCalcTest, all_operations)
   testEval("0 && 0", 0);
 }
 
-TEST_F(HexCalcTest, brackets_evaluation)
+TEST_F(OHBCalcTest, brackets_evaluation)
 {
   testEval("(1)", 1);
   testEval("(1+2)", 3);
@@ -120,7 +106,7 @@ TEST_F(HexCalcTest, brackets_evaluation)
   testEval("(1+2+3)*(4+3-2)", 30);
 }
 
-TEST_F(HexCalcTest, precedence)
+TEST_F(OHBCalcTest, precedence)
 {
   testEval("1+2-3*4", -9);
   testEval("1*2 + 3*4", 14);
@@ -129,7 +115,7 @@ TEST_F(HexCalcTest, precedence)
   testEval("1*2+3<<4", 80); // 1, 2, 3
 }
 
-TEST_F(HexCalcTest, correct_decoding)
+TEST_F(OHBCalcTest, correct_decoding)
 {
   testEval("0i", 0);
   testEval("1010101010111i", 5463);
@@ -147,14 +133,14 @@ TEST_F(HexCalcTest, correct_decoding)
 
 }
 
-TEST_F(HexCalcTest, mixing_types)
+TEST_F(OHBCalcTest, mixing_types)
 {
   testEval("10i+101i-1b", 6);
   testEval("10h+101h-1h", 0x101 + 15);
   testEval("10i+2Fh-0x3", 46);
 }
 
-TEST_F(HexCalcTest, recurse_brackets)
+TEST_F(OHBCalcTest, recurse_brackets)
 {
   testEval("(((4)))", 4);
   testEval("3 * (((2 - 3) + 4 * 5) / 2 + 3) ", 36);
@@ -162,56 +148,4 @@ TEST_F(HexCalcTest, recurse_brackets)
 
   testEval("3 * (((2 - 3) + 4 * 5) / 2 ) - 4 * (1 + 2 * (-1 + 1i) )", 27 - 4);
   testEval("(AH ^ (0x5F - 1010111i)) * (17o + (24h-24)*11i)", 102);
-}
-
-
-TEST_F(HexCalcTest, parse_number)
-{
-  testPositionAtError("12k4", 2);
-  testPositionAtError("1234q", 4);
-  testPositionAtError("z1", 0);
-  testPositionAtError("101012i", 5);
-  testPositionAtError("1FBGCh", 3);
-  testPositionAtError("1234F", 4);
-  testPositionAtError("012348", 5);
-  testPositionAtError("0x012L48", 5);
-
-  testPositionAtError("123 + 2q6", 7);
-  testPositionAtError("123h + 2q6", 8);
-  testPositionAtError("123op", 4);
-  testPositionAtError("123op1", 3);
-  testPositionAtError("(123+(456+234*(123+123q)))", 22);
-  testPositionAtError("(123+456+67q8)", 11);
-  testPositionAtError("(123+45f6+678)", 7);
-  testPositionAtError("1+t2", 2);
-
-}
-
-TEST_F(HexCalcTest, unknown_op)
-{
-  testPositionAtError("123h # 123", 5);
-  testPositionAtError("123h 8 123", 5);
-  testPositionAtError("123h?123", 4);
-}
-
-TEST_F(HexCalcTest, unfinished)
-{
-  testPositionAtError("123h + ", 7);
-}
-
-TEST_F(HexCalcTest, divizion_by_zero)
-{
-  testPositionAtError("1/0", 1);
-  testPositionAtError("2+1/(4-2*2)", 3);
-  testPositionAtError("(2+1)/(4-2*2)", 5);
-  testPositionAtError("2*(4/(2-2)", 4);
-}
-
-
-TEST_F(HexCalcTest, wrong_brackets)
-{
-  testPositionAtError("()", 1);
-  testPositionAtError("((1)", 4);
-  testPositionAtError("(1))", 3);
-  testPositionAtError("(2+)3", 3);
 }

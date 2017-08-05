@@ -19,5 +19,7 @@ elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
 endif()
 
 
+enable_testing()
+install()
 add_subdirectory(lib)
 add_subdirectory(cohbcalc)
