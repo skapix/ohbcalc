@@ -5,44 +5,68 @@
 
 // Done in template way for future 32 and 16 bits calculating
 // and not only for cpp types
-// uint64_t
-// TODO: toOctal
 
 template <typename T>
-std::string toHex(T val, bool leadingZeroes = false)
+std::string toOctal(T val, bool leadingZeros = false)
+{
+  using UnsignedT = typename std::make_unsigned<T>::type;
+  size_t totalAmountOfDigits = (sizeof(T) * 8 / 3) + (sizeof(T) * 8 % 3 != 0);
+  if (val == 0)
+  {
+    size_t amountZeros = leadingZeros ? totalAmountOfDigits  : 1;
+    return std::string(amountZeros, '0');
+  }
+  std::string result;
+  HexCalcImpl::toBaseImpl<8>(result, static_cast<UnsignedT>(val));
+  return leadingZeros ?
+         std::string(totalAmountOfDigits - result.size(), '0') + result :
+         result;
+}
+
+template <typename T>
+std::string toHex(T val, bool leadingZeros = false)
 {
   using UnsignedT = typename std::make_unsigned<T>::type;
   if (val == 0)
-    return "0";
+  {
+    size_t amountZeros = leadingZeros ? sizeof(T) * 2 : 1;
+    return std::string(amountZeros, '0');
+  }
   std::string result;
   HexCalcImpl::toHexImpl(result, static_cast<UnsignedT>(val));
-  return leadingZeroes ?
+  return leadingZeros ?
          std::string(sizeof(T)*2 - result.size(), '0') + result :
          result;
 }
 
 template <typename T>
-std::string toChars(T val, bool leadingZeroes = false)
+std::string toChars(T val, bool leadingZeros = false)
 {
   using UnsignedT = typename std::make_unsigned<T>::type;
   if (val == 0)
-    return "";
+  {
+    size_t amountZeros = leadingZeros ? sizeof(T) : 0;
+    return std::string(amountZeros, '\00');
+  }
   std::string result;
   HexCalcImpl::toCharsImpl(result, static_cast<UnsignedT>(val));
-  return leadingZeroes ?
-         std::string(sizeof(T) - result.size(), '0') + result :
+  return leadingZeros ?
+         std::string(sizeof(T) - result.size(), '\00') + result :
          result;
 }
 
 template <typename T>
-std::string toBinary(T val, bool leadingZeroes = false)
+std::string toBinary(T val, bool leadingZeros = false)
 {
   using UnsignedT = typename std::make_unsigned<T>::type;
   if (val == 0)
-    return "0";
+  {
+    size_t amount = leadingZeros ? sizeof(T) * 8 : 1;
+    return std::string(amount, '0');
+  }
   std::string result;
-  HexCalcImpl::toBinaryImpl(result, static_cast<UnsignedT>(val));
-  return leadingZeroes ?
+  HexCalcImpl::toBaseImpl<2>(result, static_cast<UnsignedT>(val));
+  return leadingZeros ?
          std::string(sizeof(T)*8 - result.size(), '0') + result :
          result;
 }

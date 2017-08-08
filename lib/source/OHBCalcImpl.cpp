@@ -244,7 +244,6 @@ int64_t getExpressionImpl(const int64_t arg1, const BinaryOperation &operation, 
     return binaryOpWrapper(operation, arg2);
   }
   pos += localPos;
-  savedPos = pos;
 
   const int operationPrecedence = operation.getPrecedence();
   const int nextOperationPrecedence = nextOperation->getPrecedence();
@@ -256,6 +255,7 @@ int64_t getExpressionImpl(const int64_t arg1, const BinaryOperation &operation, 
     int64_t result = getExpressionImpl(newArg, *nextOperation, expression, localPos);
     return result;
   }
+  savedPos = pos;
 
   int64_t newArg = getExpressionImpl(arg2, *nextOperation, expression, localPos);
   return binaryOpWrapper(operation, newArg);

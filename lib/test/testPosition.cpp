@@ -66,6 +66,8 @@ TEST_F(OHBTestPos, divizion_by_zero)
   testPositionAtError("2+1/(4-2*2)", 3);
   testPositionAtError("(2+1)/(4-2*2)", 5);
   testPositionAtError("2*(4/(2-2)", 4);
+  testPositionAtError("1/0+2", 1);
+
 }
 
 

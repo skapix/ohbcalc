@@ -5,6 +5,8 @@
 
 namespace HexCalcImpl
 {
+
+
 inline char digitToHex(const uint8_t hexDigit)
 {
   assert(hexDigit < 16);
@@ -39,16 +41,18 @@ void toCharsImpl(std::string &result, T val)
   }
 }
 
-template <typename T>
-void toBinaryImpl(std::string& result, T val)
+template <int Base, typename T>
+void toBaseImpl(std::string& result, T val)
 {
-  if (val > 1)
+  if (val >= Base)
   {
-    toBinaryImpl(result, val / 2);
-    result.push_back(static_cast<char>('0' + (val % 2)));
+    toBaseImpl<Base, T>(result, val / Base);
+    result.push_back(static_cast<char>('0' + val % Base));
   }
-  else if (val == 1)
-    result.push_back('1');
+  else
+  {
+    result.push_back('0' + val);
+  }
 }
 
 }

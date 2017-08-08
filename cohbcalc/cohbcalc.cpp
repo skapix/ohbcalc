@@ -74,6 +74,7 @@ int main(int argc, const char * argv[])
       auto result = calculator.eval(expression);
       cout << "d: " << result << endl;
       cout << "h: " << toHex(result) << endl;
+      cout << "o: " << toOctal(result) << endl;
       cout << "i: " << toBinary(result) << endl;
     }
     catch (const OHBException &expr)
@@ -81,7 +82,7 @@ int main(int argc, const char * argv[])
       markError(expr.getPos() + g_inputExpression.size());
       cout << expr.what() << endl;
     }
-    catch (const exception &expr) // TODO: change exception type; TODO: fix zero exception
+    catch (const exception &expr)
     {
       cout << expr.what() << endl;
     }
