@@ -1,4 +1,4 @@
-# Calculator with Hex and Binary support
+# Arithmetic integer calculator
 
 Project was inspired by [sencalc](http://www.softpedia.com/get/Science-CAD/SenCalc.shtml). This calculator is intended to be cross-platform with some extra features, compared to its predecessor.
 
@@ -11,13 +11,13 @@ Base numbers are set according to preffixes or suffixes, listed in the following
 |Octal | 0       | o      |
 |Hex   | 0x      | h      |
 
-Decimal numbers are used by default and don't have any distinguishing features. Calculator is case-insensetive, hence both 10h and 10H mean the same number.
+Decimal numbers are used by default and don't have any distinguishing features. Calculator is case-insensetive, hence both 10h and 10H mean the same number. Result is shown in several bases.
 
 ## Projects
 ### ohbcalc
 Core library, providing all the calculations.
 ### cohbcalc
-Console application, that uses ohbcalc library for calculating.
+Console application, that uses ohbcalc library for calculating. Result is shown in bases: decimal, hexadecimal, octal and binary.
 
 ## Requirements
 ### ohbcalc
