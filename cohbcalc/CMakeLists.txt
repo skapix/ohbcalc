@@ -2,12 +2,12 @@ cmake_minimum_required(VERSION 3.0)
 
 project(cohbcalc)
 
-set(sources ${CMAKE_CURRENT_SOURCE_DIR}/cohbcalc.cpp ConsoleHandler.cpp ConsoleHandler.h KeyBindings.h ExpressionHistory.cpp ExpressionHistory.h)
+set(sources ${CMAKE_CURRENT_SOURCE_DIR}/cohbcalc.cpp ConsoleHandler.cpp ConsoleHandler.h KeyBindings.h ../common/ExpressionHistory.cpp ../common/ExpressionHistory.h)
 
 add_executable(cohbcalc ${sources})
 
 set_property(TARGET cohbcalc PROPERTY CXX_STANDARD 17)
-target_link_libraries(cohbcalc ohbcalc ${AdditionalLibraries})
+target_link_libraries(cohbcalc ohbcalc)
 
 install(TARGETS cohbcalc DESTINATION bin)
 

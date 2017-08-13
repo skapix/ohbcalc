@@ -301,7 +301,7 @@ int64_t OHBCalcImpl::eval(const std::string &expression) {
   }
   if (pos != static_cast<size_t>(expression.length()))
   {
-    throw OHBException(pos, string("Can't parse all expression, stopped at position ") + std::to_string(pos));
+    throw OHBException(pos, "Can't parse all expression");
   }
   return result;
 }

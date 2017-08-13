@@ -2,7 +2,6 @@
 
 #include <deque>
 #include <string>
-#include <optional>
 
 class ExpressionHistory {
 public:

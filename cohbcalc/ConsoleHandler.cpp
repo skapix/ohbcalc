@@ -1,6 +1,6 @@
 #include "ConsoleHandler.h"
 #include "KeyBindings.h"
-#include "ExpressionHistory.h"
+#include "../common/ExpressionHistory.h"
 
 #include <iostream>
 #include <map>
