@@ -5,6 +5,7 @@
 
 using namespace std;
 
+// Important structure for moving position if the exception was thrown
 struct PositionMover
 {
   PositionMover(size_t &posToMove, const size_t &posToAdd)

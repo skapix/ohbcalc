@@ -25,6 +25,7 @@ private:
 
   QLineEdit *m_editor;
   QLineEdit *m_errorLine;
+  const QFont& m_editorFont;
 
   ResultView *m_decimal;
   ResultView *m_udecimal;
