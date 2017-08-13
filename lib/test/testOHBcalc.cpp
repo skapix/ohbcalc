@@ -113,7 +113,12 @@ TEST_F(OHBCalcTest, precedence)
   testEval("1+2 * 3+4", 11);
   testEval("1<<2+3*4", 1 << 14); // operation sequence order: 3, 2, 1
   testEval("1*2+3<<4", 80); // 1, 2, 3
-  testEval("1 << 2 + 1 << 3", 64);
+  testEval("1 << 2 + 1 << 3", 64); // 2, 1, 3
+  testEval("0 + 1 << 2 + 1 << 3 + 1 - 1", 64);
+
+  testEval("1 << 1 + 1 + 1 << 1", 16);
+  testEval("1 << 1 + 2 * 1 << 1", 16);
+  testEval("1 << 1 + 2 * 1 ** 1 * 1 << 1", 16);
 }
 
 TEST_F(OHBCalcTest, correct_decoding)

@@ -46,6 +46,10 @@ TEST_F(OHBTestPos, parse_number)
   testPositionAtError("(123+45f6+678)", 7);
   testPositionAtError("1+t2", 2);
 
+
+  testPositionAtError("0 + 1 << 2 + 1p << 3 + 1 - 1", 14);
+  testPositionAtError("0 + 1 << 2 + 1 p< 3 + 1 - 1", 15);
+
 }
 
 TEST_F(OHBTestPos, unknown_op)
