@@ -37,7 +37,7 @@ const BinaryOperation binaryOperations[]
   {
     BinaryOperation(Associativity::Left, 15, "<<", [](int64_t a, int64_t b){ return a << b;}),
     BinaryOperation(Associativity::Left, 15, ">>", [](int64_t a, int64_t b){ return a >> b;}),
-    BinaryOperation(Associativity::Right, 40, "**", [](int64_t a, int64_t b){ return std::pow(a, b);}),
+    BinaryOperation(Associativity::Right, 40, "**", [](int64_t a, int64_t b){ return static_cast<int64_t>(std::pow(a, b));}),
     BinaryOperation(Associativity::Left, 20, "+", [](int64_t a, int64_t b){ return a + b;}),
     BinaryOperation(Associativity::Left, 20, "-", [](int64_t a, int64_t b){ return a - b;}),
     BinaryOperation(Associativity::Left, 30, "*", [](int64_t a, int64_t b){ return a * b;}),

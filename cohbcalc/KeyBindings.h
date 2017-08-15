@@ -11,5 +11,5 @@
 #define CHKEY_HOME                               27, 91, 72
 #define CHKEY_END                                27, 91, 70
 #define CHKEY_BACKSPACE                                 127
-#define CHKEY_DELETE                                    27, 91, 51, 126
+#define CHKEY_DELETE                        27, 91, 51, 126
 #define CHKEY_ENDLINE                                    10

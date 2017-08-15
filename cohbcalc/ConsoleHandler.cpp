@@ -8,9 +8,10 @@
 #include <cassert>
 #include <array>
 #include <algorithm>
+#include <cctype> // isspace
 
 using namespace std;
-
+#ifndef WIN32
 // linux only headers
 #include <termios.h>
 #include <sys/ioctl.h>
@@ -45,7 +46,13 @@ char getch()
 {
   return getchar();
 }
-
+#else // WIN32
+#include <conio.h>
+void initConsole()
+{}
+void deinitConsole()
+{}
+#endif
 
 ///////////////////////////
 ///////////////////////////
@@ -67,7 +74,7 @@ constexpr const int ch_backspace[] = {CHKEY_BACKSPACE};
 constexpr const int ch_delete[] = {CHKEY_DELETE};
 constexpr const int ch_endline[] = {CHKEY_ENDLINE};
 
-#define PTRSIZE(constv) make_pair(constv, sizeof(constv) / sizeof(constv[0]))
+#define PTRSIZE(constv) make_pair<const int*, int>(&*constv, sizeof(constv) / sizeof(constv[0]))
 constexpr const pair<const int*, int> g_allSpecial[] = {PTRSIZE(ch_left) , PTRSIZE(ch_right), PTRSIZE(ch_up),
                                   PTRSIZE(ch_down), PTRSIZE(ch_ctrlleft), PTRSIZE(ch_ctrlright),
                                   PTRSIZE(ch_pgup), PTRSIZE(ch_pgdown), PTRSIZE(ch_home), PTRSIZE(ch_end),
@@ -138,7 +145,13 @@ constexpr array<int, g_amountStartUnique> getSpecialKeyStartSequence() noexcept
   return result;
 }
 
+// arrays are not fully constexprs in VC++
+#ifdef WIN32
+const auto g_specialKeyStartSequence = getSpecialKeyStartSequence();
+#else
 constexpr const auto g_specialKeyStartSequence = getSpecialKeyStartSequence();
+#endif
+
 
 constexpr const int maxSequenceLength() noexcept
 {
@@ -167,7 +180,7 @@ Character readChar()
   read[0] = getch();
 
   if (!isSpecialKeyStart(read[0])) {
-    c = read[0];
+    c = static_cast<char>(read[0]);
     return c;
   }
   // parse SpecialKey

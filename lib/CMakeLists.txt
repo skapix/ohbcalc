@@ -47,7 +47,7 @@ if (NOT GSL_COMPILED)
 endif(NOT GSL_COMPILED)
 
 set(sources source/OHBCalcLib.cpp source/OHBCalcImpl.cpp source/OHBCalcImpl.h
-		test/testOHBcalc.cpp source/TokenOperation.cpp source/TokenOperation.h source/CommonDefines.h
+		source/TokenOperation.cpp source/TokenOperation.h source/CommonDefines.h
 		source/CommonDefines.cpp include/ohbTransform.h include/transformImpl/TransformImpl.h
 		include/ohbException.h include/ohbcalc.h)
 

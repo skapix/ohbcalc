@@ -78,7 +78,7 @@ int64_t tokenFromBase<16>(CStringView token, size_t &pos)
 
 inline char lastIdentificator(CStringView expression)
 {
-  return tolower(expression.last(1)[0]);
+  return static_cast<char>(tolower(expression.last(1)[0]));
 }
 
 int64_t getValue(CStringView expression, size_t &pos)

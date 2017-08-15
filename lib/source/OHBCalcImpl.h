@@ -2,6 +2,7 @@
 
 #include "CommonDefines.h"
 #include <string>
+#include <cstdint> // int64_t
 
 
 class OHBCalcImpl {

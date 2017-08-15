@@ -45,8 +45,6 @@ void ResultView::on_calculated(int64_t result)
   if (m_representation)
   {
     std::string view = m_representation(result);
-    size_t sz = view.size();
-    const char *data = view.data();
-    m_value->setText(QString::fromLatin1(data, sz));
+    m_value->setText(QString::fromStdString(view));
   }
 }
