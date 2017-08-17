@@ -2,8 +2,18 @@ cmake_minimum_required(VERSION 3.0)
 
 project(cohbcalc)
 
-set(sources ${CMAKE_CURRENT_SOURCE_DIR}/cohbcalc.cpp ConsoleHandler.cpp ConsoleHandler.h KeyBindings.h ../common/ExpressionHistory.cpp ../common/ExpressionHistory.h)
+set(sources cohbcalc.cpp ConsoleHandler.cpp ConsoleHandler.h KeyHandler.h
+    ../common/ExpressionHistory.cpp ../common/ExpressionHistory.h)
 
+if (WIN32)
+    set(sources ${sources} WindowsKeyHandler.cpp)
+elseif (UNIX AND NOT APPLE)
+    set(sources ${sources} LinuxKeyHandler.cpp)
+else()
+    message(WARNING "cohbcalc does not support this system. Project cohbcalc is disabled")
+    return()
+endif()
+    
 add_executable(cohbcalc ${sources})
 
 set_property(TARGET cohbcalc PROPERTY CXX_STANDARD 17)

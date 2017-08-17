@@ -25,8 +25,6 @@ enum class SpecialKey : char
 using Character = std::variant<char, SpecialKey>;
 
 
-Character readChar();
-
 void initConsole();
 void deinitConsole();
 

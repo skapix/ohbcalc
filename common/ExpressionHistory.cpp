@@ -7,6 +7,11 @@ ExpressionHistory::ExpressionHistory() : m_it(m_history.cend())
 
 const std::string *ExpressionHistory::getElement(int relPos)
 {
+  if (m_history.empty())
+  {
+    return nullptr;
+  }
+
   while (relPos < 0)
   {
     if (m_it == m_history.begin())

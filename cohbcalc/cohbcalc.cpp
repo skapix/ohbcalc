@@ -1,4 +1,5 @@
 #include "ohbcalc.h"
+#include "KeyHandler.h"
 #include "ohbTransform.h"
 #include "ohbException.h"
 #include "ConsoleHandler.h"
