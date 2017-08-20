@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.8)
 
 project(cohbcalc)
 
@@ -16,7 +16,8 @@ endif()
     
 add_executable(cohbcalc ${sources})
 
-set_property(TARGET cohbcalc PROPERTY CXX_STANDARD 17)
+target_compile_features(cohbcalc PRIVATE cxx_std_17)
+
 target_link_libraries(cohbcalc ohbcalc)
 
 install(TARGETS cohbcalc DESTINATION bin)

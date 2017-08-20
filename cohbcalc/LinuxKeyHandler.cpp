@@ -1,6 +1,12 @@
-// linux only headers
+#include "ConsoleHandler.h"
 #include <termios.h>
 #include <sys/ioctl.h>
+#include <cstdio>
+#include <utility>
+#include <map>
+#include <algorithm>
+
+using namespace std;
 
 
 int kbhit() {
@@ -70,7 +76,7 @@ PTRSIZE(ch_backspace), PTRSIZE(ch_delete), PTRSIZE(ch_endline) };
 
 
 struct CharComparator {
-  bool operator()(const std::pair<const int *, int> &left, const std::pair<const int *, int> &right)  const {
+  bool operator()(const pair<const int *, int> &left, const pair<const int *, int> &right)  const {
     if (left.second < right.second)
       return true;
     if (left.second > right.second)
@@ -133,13 +139,7 @@ constexpr array<int, g_amountStartUnique> getSpecialKeyStartSequence() noexcept
   return result;
 }
 
-// arrays are not fully constexprs in VC++
-#ifdef WIN32
-const auto g_specialKeyStartSequence = getSpecialKeyStartSequence();
-#else
 constexpr const auto g_specialKeyStartSequence = getSpecialKeyStartSequence();
-#endif
-
 
 constexpr const int maxSequenceLength() noexcept
 {
