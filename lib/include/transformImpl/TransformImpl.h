@@ -51,7 +51,7 @@ void toBaseImpl(std::string& result, T val)
   }
   else
   {
-    result.push_back('0' + val);
+    result.push_back('0' + static_cast<char>(val));
   }
 }
 

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(cohbcalc)
+project(gohbcalc)
 
 find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
 
@@ -18,8 +18,10 @@ endif()
     
 add_executable(gohbcalc ${GUI_EXECUTABLE} ${sources} ${resources_rcc})
 
-set_property(TARGET cohbcalc PROPERTY CXX_STANDARD 14)
+set_property(TARGET gohbcalc PROPERTY CXX_STANDARD 14)
 
 target_include_directories(gohbcalc PRIVATE ${CMAKE_SOURCE_DIR}/common)
 target_link_libraries(gohbcalc ohbcalc)
 target_link_libraries(gohbcalc Qt5::Core Qt5::Widgets)
+
+install(TARGETS gohbcalc DESTINATION bin)
