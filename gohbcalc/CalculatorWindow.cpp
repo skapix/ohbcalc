@@ -6,6 +6,8 @@
 #include <set>
 #include <QHBoxLayout>
 
+// TODO: highlight special symbols in chars, like \n, \1f, \"
+
 const auto g_bkgColor = Qt::lightGray;
 const int g_spacingBetweenEditorAndView = 10;
 const char g_binaryByteSeparator = '-';

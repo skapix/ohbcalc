@@ -36,6 +36,7 @@ TEST_F(OHBTestPos, parse_number)
   testPositionAtError("1234F", 4);
   testPositionAtError("012348", 5);
   testPositionAtError("0x012L48", 5);
+  testPositionAtError("1 + 0x2L1", 7);
 
   testPositionAtError("123 + 2q6", 7);
   testPositionAtError("123h + 2q6", 8);
@@ -71,9 +72,7 @@ TEST_F(OHBTestPos, divizion_by_zero)
   testPositionAtError("(2+1)/(4-2*2)", 5);
   testPositionAtError("2*(4/(2-2)", 4);
   testPositionAtError("1/0+2", 1);
-
 }
-
 
 TEST_F(OHBTestPos, wrong_brackets)
 {
@@ -81,4 +80,15 @@ TEST_F(OHBTestPos, wrong_brackets)
   testPositionAtError("((1)", 4);
   testPositionAtError("(1))", 3);
   testPositionAtError("(2+)3", 3);
+}
+
+TEST_F(OHBTestPos, chars)
+{
+  testPositionAtError("\"", 1); // no closing "
+  testPositionAtError("\"\\\"", 3); // unexpected end
+  testPositionAtError("\"\"\"", 2);
+  testPositionAtError("\"\\1\"", 1); // unexpected end. Should have 2 hex digits
+  testPositionAtError("\"\\1q\"", 3);
+  testPositionAtError("\"\\g1\"", 2);
+  testPositionAtError("\"\\q\"", 2);
 }

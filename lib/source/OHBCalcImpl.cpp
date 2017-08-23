@@ -2,6 +2,7 @@
 #include "ohbException.h"
 #include "CommonDefines.h"
 #include "TokenOperation.h"
+#include <map>
 
 using namespace std;
 
@@ -51,6 +52,21 @@ int64_t tokenFromBase(CStringView token, size_t &pos)
   return result;
 }
 
+uint8_t charToHex(char c)
+{
+  if (isdigit(c))
+  {
+    return static_cast<uint8_t>(c - '0');
+  }
+
+  char lc = static_cast<char>(tolower(c));
+  if (lc >= 'a' && lc <= 'f')
+  {
+    return static_cast<uint8_t>(lc - 'a' + 10);
+  }
+  throw logic_error("Can't decode character " + string(1, c) +  " in base 16");
+}
+
 template <>
 int64_t tokenFromBase<16>(CStringView token, size_t &pos)
 {
@@ -59,19 +75,73 @@ int64_t tokenFromBase<16>(CStringView token, size_t &pos)
   for (auto item : token)
   {
     result *= 16;
-    if (isdigit(item))
+    result += charToHex(item);
+    ++pos;
+  }
+  return result;
+}
+
+inline bool isHexDigit(char c)
+{
+  return (c >= '0' && c <= '9') || (tolower(c) >= 'a' && tolower(c) <= 'f');
+}
+
+static const std::map<char, uint8_t> g_specials = {{'t', '\t'}, {'n', '\n'}, {'r', '\r'}, {'n', '\n'}, {'\\', '\\'}, {'"', '"'}};
+
+uint8_t getSpecialCharacter(CStringView specialStart, size_t &pos)
+{
+  if (specialStart.empty())
+  {
+    --pos;
+    throw logic_error("Expected special character");
+  }
+
+  if (isHexDigit(specialStart[0]))
+  {
+    if (specialStart.size() < 2)
     {
-      result += item - '0';
+      --pos;
+      throw logic_error("Special character should contain 2 hex digits");
     }
-    else if (tolower(item) >= 'a' && tolower(item) <= 'f')
+    if (!isHexDigit(specialStart[1]))
     {
-      result += tolower(item) - 'a' + 10;
+      ++pos;
+      throw logic_error("Non-hex special character");
     }
-    else
+    int result = charToHex(specialStart[0]) * 16 + charToHex(specialStart[1]);
+    assert(numeric_limits<uint8_t>::max() >= result);
+    pos += 2;
+    return static_cast<uint8_t>(result);
+  }
+  // handle special symbol
+  auto it = g_specials.find(specialStart[0]);
+  if (it == g_specials.end())
+  {
+    throw  logic_error("Unknown special character");
+  }
+  ++pos;
+  return it->second;
+}
+
+template <>
+int64_t tokenFromBase<256>(CStringView token, size_t &pos)
+{
+  pos = 0;
+  int64_t result = 0;
+  assert(token.length() >= 0 && "Wrong logic");
+  const size_t sz = static_cast<size_t>(token.length());
+  for (pos = 0; pos < sz;)
+  {
+    result *= 256;
+    char item = token[pos];
+    if (item != '\\')
     {
-      throw OHBException(pos, string("Can't decode character ") + std::string(1, item) +  " in base 16");
+      result += static_cast<uint8_t>(item);
+      ++pos;
+      continue;
     }
     ++pos;
+    result += getSpecialCharacter(token.subspan(pos), pos);
   }
   return result;
 }
@@ -129,6 +199,29 @@ int64_t getValue(CStringView expression, size_t &pos)
     return false;
   };
 
+  auto isChar = [&localPos](CStringView &number)
+  {
+
+    if (number.length() >= 1 && number[0] == '"') // >= for exception
+    {
+      int itPos = 1;
+      for (; itPos < number.length(); ++itPos)
+      {
+        if (number[itPos] == '"' && number[itPos-1] != '\\')
+          break;
+      }
+      if (itPos == number.length())
+      {
+        localPos = itPos;
+        throw logic_error("Expected end of character expression");
+      }
+      localPos = 1;
+      number = number.subspan(1, itPos - 1);
+      return true;
+    }
+    return false;
+  };
+
   size_t idenSz = 0;
   for (; idenSz < static_cast<size_t>(expression.length()) && isalnum(expression[idenSz]); ++idenSz)
   {}
@@ -137,7 +230,14 @@ int64_t getValue(CStringView expression, size_t &pos)
 
   if (numberView.empty())
   {
-    // no data found
+    // no usual data found
+    numberView = expression;
+    if (isChar(numberView))
+    {
+      int64_t result = tokenFromBase<256>(numberView, pos);
+      localPos *= 2; // counting first and last identificator
+      return result;
+    }
     throw std::logic_error("Can't get identificator");
   }
 
@@ -161,6 +261,7 @@ int64_t getValue(CStringView expression, size_t &pos)
     pos += localPos == 0;
     return result;
   }
+
   if (!isdigit(lastIdentificator(numberView)))
   {
     pos += numberView.size() - 1;

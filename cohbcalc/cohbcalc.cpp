@@ -50,7 +50,7 @@ static string getLine()
 
 // TODO: add arg: calculate and exit
 // TODO: add output settings
-
+// TODO: add char output
 
 int main(int argc, const char * argv[])
 {

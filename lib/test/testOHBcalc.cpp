@@ -137,6 +137,22 @@ TEST_F(OHBCalcTest, correct_decoding)
   testEval("253477o", 87871);
   testEval("0253477", 87871);
 
+  testEval("\"\"", 0);
+  testEval("\"\\00\"", 0);
+  testEval("\"123\"", '1' * 256 * 256 + '2' * 256 + '3');
+  testEval("\"\\12\"", 0x12);
+  testEval("\"\\03\"", 3);
+  testEval("\"\\t\"", '\t');
+  testEval("\"\\r\"", '\r');
+  testEval("\"\\n\"", '\n');
+  testEval("\"\\r\\n\"", '\r' * 256 + '\n');
+  testEval("\"\\\\\"\"", '\\' * 256 + '"');
+  testEval("\"e\\\"q\"", 'e' * 256 * 256 + '"' * 256 + 'q');
+}
+
+TEST_F(OHBCalcTest, chars)
+{
+
 }
 
 TEST_F(OHBCalcTest, mixing_types)
