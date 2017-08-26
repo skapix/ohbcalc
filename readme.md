@@ -1,5 +1,7 @@
 # Arithmetic integer calculator
 
+## Octal Hex Decimal CALCulator
+
 Project was inspired by [sencalc](http://www.softpedia.com/get/Science-CAD/SenCalc.shtml). This calculator is intended to be cross-platform with some extra features, compared to its predecessor.
 
 Calculator supports evaluating of expressions, mixing decimal, octal, hexadecimal, character and binary numbers like:
@@ -14,9 +16,11 @@ Base numbers are set according to preffixes or suffixes, listed in the following
 |Octal | 0       | o      |
 |Hex   | 0x      | h      |
 
-Also support character (ASCII) input. It should be enclosed with double quotes. Ascii supports specials symbols, like: *\r \n \t*. For representing '\\' and '"' characters, use '\\\\' and '\\"' accordingly.
+ASCII (char) input should be enclosed with double quotes. Ascii supports specials symbols, like: *\r \n \t*. For representing '\\' and '"' characters, use '\\\\' and '\\"' accordingly.
 
-Decimal numbers are used by default and don't have any distinguishing features. Calculator is case-insensetive, hence both 10h and 10H mean the same number. Result is shown in several bases.
+Decimal numbers are used by default and don't have any distinguishing features, like suffix or prefix. Calculator is case-insensetive, hence both 10h and 10H mean the same number.
+
+Project consists of library (ohbcalc), console application (cohbcalc) and gui application (gohbcalc)
 
 ## Projects
 ### ohbcalc
