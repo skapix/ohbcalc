@@ -1,12 +1,12 @@
 #pragma once
 
-#include "ExpressionHistory.h"
+#include "../cohbcalc/ExpressionHistory.h"
 #include "ohbcalc.h"
 #include <QObject>
 #include <QtWidgets/QMainWindow>
 
 class ResultView;
-class QLineEdit;
+class QComboBox;
 class QLabel;
 
 class CalculatorWindow : public QMainWindow {
@@ -15,7 +15,7 @@ public:
   CalculatorWindow();
 
 private slots:
-  void on_returnPressed();
+  void on_enterPressed(const QString &data);
 
 signals:
   void calculated(int64_t result);
@@ -23,8 +23,8 @@ signals:
 private:
   OHBCalc m_calc;
 
-  QLineEdit *m_editor;
-  QLineEdit *m_errorLine;
+  QComboBox *m_editor;
+  QLabel *m_errorLine;
   const QFont& m_editorFont;
 
   ResultView *m_decimal;

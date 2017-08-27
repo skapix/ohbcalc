@@ -17,7 +17,7 @@ if (MSVC)
 endif(MSVC)
 
 set(sources cohbcalc.cpp ConsoleHandler.cpp ConsoleHandler.h KeyHandler.h
-    ../common/ExpressionHistory.cpp ../common/ExpressionHistory.h)
+    ExpressionHistory.cpp ExpressionHistory.h)
 
 if (WIN32)
     set(sources ${sources} WindowsKeyHandler.cpp)

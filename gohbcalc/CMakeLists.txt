@@ -10,7 +10,7 @@ set(resources resources/resources.qrc)
 QT5_ADD_RESOURCES(resources_rcc ${resources})
 
 set(sources gohbcalc.cpp CalculatorWindow.cpp CalculatorWindow.h
-    ${CMAKE_SOURCE_DIR}/common/ExpressionHistory.cpp ResultView.h ResultView.cpp)
+    ResultView.h ResultView.cpp)
 
 if (WIN32)
     set(GUI_EXECUTABLE WIN32)

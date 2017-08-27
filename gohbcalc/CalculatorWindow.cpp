@@ -5,16 +5,21 @@
 #include <QLineEdit>
 #include <set>
 #include <QHBoxLayout>
+#include <QComboBox>
 
-// TODO: highlight special symbols in chars, like \n, \1f, \"
+// ? TODO: highlight special symbols in chars, like \n, \1f, \"
 
+namespace
+{
 const auto g_bkgColor = Qt::lightGray;
 const int g_spacingBetweenEditorAndView = 10;
 const char g_binaryByteSeparator = '-';
 
+}
+
 CalculatorWindow::CalculatorWindow()
-  : m_editor(new QLineEdit(this))
-  , m_errorLine(new QLineEdit(this))
+  : m_editor(new QComboBox(this))
+  , m_errorLine(new QLabel(this))
   , m_editorFont(m_editor->font())
   , m_decimal(new ResultView(this, "Signed"))
   , m_udecimal(new ResultView(this, "Unsigned"))
@@ -23,15 +28,24 @@ CalculatorWindow::CalculatorWindow()
   , m_chars(new ResultView(this, "Char"))
   , m_binary(new ResultView(this, "Binary"))
 {
+  m_editor->setEditable(true);
+  m_editor->setCompleter(nullptr);
+
   setWindowIcon(QIcon(":calculator.png"));
   QWidget *centralWidget = new QWidget;
   auto layout = new QVBoxLayout(centralWidget);
   layout->setSpacing(0);
   layout->setContentsMargins(0,0,0,0);
-  QPalette pal = palette();
+
+  QPalette pal;
   pal.setColor(QPalette::Background, g_bkgColor);
   centralWidget->setAutoFillBackground(true);
   centralWidget->setPalette(pal);
+
+  pal.setColor(QPalette::WindowText, Qt::red);
+  m_errorLine->setPalette(pal);
+  m_errorLine->setIndent(m_editor->fontMetrics().averageCharWidth());
+
   layout->addWidget(m_editor);
   layout->addWidget(m_errorLine);
   layout->addSpacing(g_spacingBetweenEditorAndView);
@@ -48,8 +62,8 @@ CalculatorWindow::CalculatorWindow()
   layout->addStretch(-1);
   setCentralWidget(centralWidget);
 
-  // TODO: add history
-  connect(m_editor, &QLineEdit::returnPressed, this, &CalculatorWindow::on_returnPressed);
+  connect(m_editor, static_cast<void(QComboBox::*)(const QString &)>(&QComboBox::activated),
+          this, &CalculatorWindow::on_enterPressed);
   m_decimal->setRepresentationFunction([](int64_t result)
                                        {return std::to_string(result);});
   m_udecimal->setRepresentationFunction([](int64_t result)
@@ -73,8 +87,6 @@ CalculatorWindow::CalculatorWindow()
                                      });
 
   m_errorLine->setDisabled(true);
-  // TODO: ? change m_errorLine color to darker one (like background)
-  // and write with white characters
   int lineHeight = fontMetrics().height();
   setMaximumHeight(m_editor->height() + m_errorLine->height() +
                      g_spacingBetweenEditorAndView + m_decimal->height() +
@@ -90,12 +102,12 @@ CalculatorWindow::CalculatorWindow()
 
 }
 
-void CalculatorWindow::on_returnPressed() {
+void CalculatorWindow::on_enterPressed(const QString &str)
+{
   QString errorResult;
-  std::string expression = m_editor->text().toStdString();
+  std::string expression = str.toStdString();
   try
   {
-
     if (std::all_of(expression.begin(), expression.end(), [](char c) {return isspace(c);}))
     {
       return;
@@ -121,7 +133,6 @@ void CalculatorWindow::on_returnPressed() {
       {
         result.push_back(QChar::fromLatin1(' '));
       }
-      //result.resize(result.size() -1);
       return result;
     };
 
