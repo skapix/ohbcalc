@@ -17,12 +17,12 @@ if (MSVC)
 endif(MSVC)
 
 set(sources cohbcalc.cpp ConsoleHandler.cpp ConsoleHandler.h KeyHandler.h
-    ExpressionHistory.cpp ExpressionHistory.h)
+    ExpressionHistory.cpp ExpressionHistory.h OutputRepresentation.cpp OutputRepresentation.h)
 
 if (WIN32)
     set(sources ${sources} WindowsKeyHandler.cpp)
 elseif (UNIX AND NOT APPLE)
-    set(sources ${sources} LinuxKeyHandler.cpp OutputRepresentation.cpp OutputRepresentation.h)
+    set(sources ${sources} LinuxKeyHandler.cpp)
 else()
     message(WARNING "cohbcalc does not support this system. Project cohbcalc is disabled")
     return()

@@ -3,10 +3,9 @@
 #include <sstream>
 #include <iomanip>
 #include <iostream>
+#include <algorithm>
 
 using namespace std;
-
-
 
 namespace
 {
