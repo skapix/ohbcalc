@@ -79,7 +79,7 @@ const T* getOperation(const T* begin, const T* end, CStringView str, size_t &end
       continue;
     }
 
-    if (operation == str.subspan(0, operation.length()))
+    if (operation == str.substr(0, operation.length()))
     {
       endOperator += operation.length();
       return it;
@@ -91,7 +91,7 @@ const T* getOperation(const T* begin, const T* end, CStringView str, size_t &end
 const BinaryOperation *getBinaryOperation(const CStringView str, size_t &endOperator)
 {
   endOperator = getFirstNonEmptySymbol(str);
-  return getOperation(begin(binaryOperations), end(binaryOperations), str.subspan(endOperator), endOperator);
+  return getOperation(begin(binaryOperations), end(binaryOperations), str.substr(endOperator), endOperator);
 }
 
 const UnaryOperation unaryOperations[]
@@ -109,5 +109,5 @@ bool operator==(const UnaryOperation &left, const CStringView str)
 const UnaryOperation *getUnaryOperation(const CStringView str, size_t &endOperator)
 {
   endOperator = getFirstNonEmptySymbol(str);
-  return getOperation(begin(unaryOperations), end(unaryOperations), str.subspan(endOperator), endOperator);
+  return getOperation(begin(unaryOperations), end(unaryOperations), str.substr(endOperator), endOperator);
 }

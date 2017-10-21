@@ -1,5 +1,7 @@
 #include "CommonDefines.h"
 #include <cctype>
+#include <algorithm>
+#include <cassert>
 
 size_t getFirstNonEmptySymbol(CStringView str)
 {

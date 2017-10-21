@@ -48,8 +48,6 @@ private:
   std::function<int64_t(int64_t, int64_t)> implementation;
 };
 
-constexpr ArrayView<const BinaryOperation> getOperations();
-
 const BinaryOperation *getBinaryOperation(const CStringView str, size_t &endOperator);
 const UnaryOperation *getUnaryOperation(const CStringView str, size_t &endOperator);
 

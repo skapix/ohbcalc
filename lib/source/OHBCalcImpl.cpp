@@ -3,6 +3,7 @@
 #include "CommonDefines.h"
 #include "TokenOperation.h"
 #include <map>
+#include <cassert>
 
 using namespace std;
 
@@ -141,14 +142,14 @@ int64_t tokenFromBase<256>(CStringView token, size_t &pos)
       continue;
     }
     ++pos;
-    result += getSpecialCharacter(token.subspan(pos), pos);
+    result += getSpecialCharacter(token.substr(pos), pos);
   }
   return result;
 }
 
 inline char lastIdentificator(CStringView expression)
 {
-  return static_cast<char>(tolower(expression.last(1)[0]));
+  return static_cast<char>(tolower(expression.back()));
 }
 
 int64_t getValue(CStringView expression, size_t &pos)
@@ -162,12 +163,12 @@ int64_t getValue(CStringView expression, size_t &pos)
     if (number.length() > 2 && number[0] == '0' && tolower(number[1]) == 'x')
     {
       localPos = 2;
-      number = number.subspan(2);
+      number = number.substr(2);
       return true;
     }
     if (lastIdentificator(number) == 'h')
     {
-      number = number.subspan(0, number.length() - 1);
+      number = number.substr(0, number.length() - 1);
       return true;
     }
     return false;
@@ -177,7 +178,7 @@ int64_t getValue(CStringView expression, size_t &pos)
   {
     if (number.length() > 1 && (lastIdentificator(number) == 'b' || lastIdentificator(number) == 'i'))
     {
-      number = number.subspan(0, number.length() - 1);
+      number = number.substr(0, number.length() - 1);
       return true;
     }
     return false;
@@ -188,12 +189,12 @@ int64_t getValue(CStringView expression, size_t &pos)
     if (number.length() > 1 && number[0] == '0')
     {
       localPos = 1;
-      number = number.subspan(1);
+      number = number.substr(1);
       return true;
     }
     if (number.length() > 1 && lastIdentificator(number) == 'o')
     {
-      number = number.subspan(0, number.length() - 1);
+      number = number.substr(0, number.length() - 1);
       return true;
     }
     return false;
@@ -204,7 +205,7 @@ int64_t getValue(CStringView expression, size_t &pos)
 
     if (number.length() >= 1 && number[0] == '"') // >= for exception
     {
-      int itPos = 1;
+      size_t itPos = 1;
       for (; itPos < number.length(); ++itPos)
       {
         if (number[itPos] == '"' && number[itPos-1] != '\\')
@@ -216,7 +217,7 @@ int64_t getValue(CStringView expression, size_t &pos)
         throw logic_error("Expected end of character expression");
       }
       localPos = 1;
-      number = number.subspan(1, itPos - 1);
+      number = number.substr(1, itPos - 1);
       return true;
     }
     return false;
@@ -226,7 +227,7 @@ int64_t getValue(CStringView expression, size_t &pos)
   for (; idenSz < static_cast<size_t>(expression.length()) && isalnum(expression[idenSz]); ++idenSz)
   {}
 
-  CStringView numberView = expression.subspan(0, idenSz);
+  CStringView numberView = expression.substr(0, idenSz);
 
   if (numberView.empty())
   {
@@ -281,7 +282,7 @@ int64_t getToken(CStringView expression, size_t &pos)
 
   if (auto unary = getUnaryOperation(expression, pos))
   {
-    int64_t result = getToken(expression.subspan(pos), localPos);
+    int64_t result = getToken(expression.substr(pos), localPos);
     return unary->apply(result);
   }
   if (static_cast<size_t>(expression.length()) == pos)
@@ -291,7 +292,7 @@ int64_t getToken(CStringView expression, size_t &pos)
 
   if (expression[pos] == '(')
   {
-    int64_t token = getExpressionImpl(expression.subspan(++pos), localPos);
+    int64_t token = getExpressionImpl(expression.substr(++pos), localPos);
     pos += localPos;
     mover.disable();
     if (static_cast<size_t>(expression.length()) <= pos || expression[pos] != ')')
@@ -304,7 +305,7 @@ int64_t getToken(CStringView expression, size_t &pos)
 
 
   // can throw
-  int64_t result = getValue(expression.subspan(pos), localPos);
+  int64_t result = getValue(expression.substr(pos), localPos);
   return result;
 }
 
@@ -350,11 +351,11 @@ std::pair<int64_t, const BinaryOperation*> getExpressionImpl(const int64_t arg1,
 
 
   const int64_t arg2 = getToken(expression, pos);
-  expression = expression.subspan(pos);
+  expression = expression.substr(pos);
 
 
   auto nextOperation = getBinaryOperation(expression, localPos);
-  expression = expression.subspan(localPos);
+  expression = expression.substr(localPos);
 
   if (nextOperation == nullptr)
   {
@@ -383,7 +384,7 @@ std::pair<int64_t, const BinaryOperation*> getExpressionImpl(const int64_t arg1,
   {
     auto localResult = getExpressionImpl(arg2, *nextOperation, expression, localPos, &operation);
     int64_t result = binaryOpWrapper(operation, localResult.first);
-    expression = expression.subspan(localPos);
+    expression = expression.substr(localPos);
 
     if (localResult.second == nullptr)
     {
@@ -405,10 +406,10 @@ int64_t getExpressionImpl(CStringView expression, size_t &pos)
   auto mover = PositionMover(pos, localPos);
   int64_t arg1 = getToken(expression, localPos);
   pos += localPos;
-  expression = expression.subspan(localPos);
+  expression = expression.substr(localPos);
 
   auto op =  getBinaryOperation(expression, localPos);
-  expression = expression.subspan(localPos);
+  expression = expression.substr(localPos);
   pos += localPos;
   if (op == nullptr)
   {

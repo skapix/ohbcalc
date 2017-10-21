@@ -16,8 +16,25 @@ protected:
     SCOPED_TRACE(trace.c_str());
     EXPECT_EQ(calculator.eval(expression), result);
   }
+  void testEval(const string &checkedExpression, const string &expression)
+  {
+    const string trace = string("Check: ") + checkedExpression + " == " + expression;
+    SCOPED_TRACE(trace.c_str());
+    EXPECT_EQ(calculator.eval(expression), calculator.eval(checkedExpression));
+  }
 
 };
+
+TEST_F(OHBCalcTest, case_insensetivity)
+{
+  testEval("1i", "1I");
+  testEval("1b", "1B");
+  testEval("1i", "1b");
+  testEval("10h", "10H");
+  testEval("10h", "0x10");
+  testEval("123o", "123O");
+  testEval("0123", "123o");
+}
 
 
 TEST_F(OHBCalcTest, solo_number)

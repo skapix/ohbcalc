@@ -1,13 +1,9 @@
 #pragma once
 
-#include <gsl/gsl>
-#include <gsl/string_span>
-#include <gsl/span>
+#include <string_view>
 
-using CStringView = gsl::cstring_span<>;
+using CStringView = std::string_view;
 
-template <class T>
-using ArrayView = gsl::span<T>;
 
 size_t getFirstNonEmptySymbol(CStringView str);
 
