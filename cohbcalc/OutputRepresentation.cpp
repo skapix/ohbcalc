@@ -35,11 +35,11 @@ string printChars(const int64_t result)
 
 OutputRepresentation::OutputRepresentation()
 {
-  m_outputs.push_back({'d', [](int64_t result) {return std::to_string(result);}});
-  m_outputs.push_back({'h', [](int64_t result) {return toHex(result);}});
-  m_outputs.push_back({'o', [](int64_t result) {return toOctal(result);}});
+  m_outputs.push_back({'d', [](int64_t result) { return std::to_string(result); }});
+  m_outputs.push_back({'h', [](int64_t result) { return toHex(result); }});
+  m_outputs.push_back({'o', [](int64_t result) { return toOctal(result); }});
   m_outputs.push_back({'c', printChars});
-  m_outputs.push_back({'b', [](int64_t result) {return toBinary(result);}});
+  m_outputs.push_back({'b', [](int64_t result) { return toBinary(result); }});
 }
 
 void OutputRepresentation::printResult(int64_t result)
@@ -63,7 +63,7 @@ bool OutputRepresentation::handleLetter(char letter, bool value)
     return false;
   }
   auto it = std::find_if(m_outputs.begin(), m_outputs.end(),
-                      [letter](const RepresentationInfo &info) {return info.character == letter;});
+                         [letter](const RepresentationInfo &info) { return info.character == letter; });
   if (it == m_outputs.end())
   {
     cerr << "No representation for letter '" << letter << "' found" << endl;
@@ -73,7 +73,7 @@ bool OutputRepresentation::handleLetter(char letter, bool value)
   return false;
 }
 
-static bool isOutputReprSettings(const string& expression)
+static bool isOutputReprSettings(const string &expression)
 {
   if (expression.size() < g_outputName.size())
   {
@@ -90,7 +90,8 @@ static bool isOutputReprSettings(const string& expression)
   return true;
 }
 
-bool OutputRepresentation::parseOutputSettings(const std::string &settings) {
+bool OutputRepresentation::parseOutputSettings(const std::string &settings)
+{
 
   if (!isOutputReprSettings(settings))
   {
@@ -99,7 +100,10 @@ bool OutputRepresentation::parseOutputSettings(const std::string &settings) {
 
   enum
   {
-    Undefined, Set, Append, Subtract
+    Undefined,
+    Set,
+    Append,
+    Subtract
   } settingType = Undefined;
   size_t startPos = g_outputName.size();
 
@@ -107,13 +111,19 @@ bool OutputRepresentation::parseOutputSettings(const std::string &settings) {
   {
     settingType = Set;
     ++startPos;
-  } else if (settings[startPos] == '+' && settings[startPos + 1] == '=') {
+  }
+  else if (settings[startPos] == '+' && settings[startPos + 1] == '=')
+  {
     settingType = Append;
     startPos += 2;
-  } else if (settings[startPos] == '-' && settings[startPos + 1] == '=') {
+  }
+  else if (settings[startPos] == '-' && settings[startPos + 1] == '=')
+  {
     settingType = Subtract;
     startPos += 2;
-  } else {
+  }
+  else
+  {
     return false;
   }
   assert(settingType != Undefined);
@@ -134,4 +144,3 @@ bool OutputRepresentation::parseOutputSettings(const std::string &settings) {
 
   return true;
 }
-

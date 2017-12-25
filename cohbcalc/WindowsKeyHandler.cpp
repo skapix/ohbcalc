@@ -17,31 +17,16 @@ void initConsole()
   g_outConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 }
 
-void deinitConsole()
-{
+void deinitConsole() {}
 
-}
+static const map<int, SpecialKey> g_toSpecials = {
+    {VK_LEFT, SpecialKey::Left},      {VK_RIGHT, SpecialKey::Right},   {VK_UP, SpecialKey::Up},
+    {VK_DOWN, SpecialKey::Down},      {VK_PRIOR, SpecialKey::PageUp},  {VK_NEXT, SpecialKey::PageDown},
+    {VK_HOME, SpecialKey::Home},      {VK_END, SpecialKey::End},       {VK_DELETE, SpecialKey::Delete},
+    {VK_BACK, SpecialKey::BackSpace}, {VK_RETURN, SpecialKey::EndLine}};
 
-static const map<int, SpecialKey> g_toSpecials =
-{
-  {VK_LEFT, SpecialKey::Left},
-  {VK_RIGHT, SpecialKey::Right},
-  {VK_UP, SpecialKey::Up},
-  {VK_DOWN, SpecialKey::Down},
-  {VK_PRIOR, SpecialKey::PageUp},
-  {VK_NEXT, SpecialKey::PageDown},
-  {VK_HOME, SpecialKey::Home},
-  {VK_END, SpecialKey::End},
-  {VK_DELETE, SpecialKey::Delete},
-  {VK_BACK, SpecialKey::BackSpace},
-  {VK_RETURN, SpecialKey::EndLine}
-};
-
-static const map<int, SpecialKey> g_toSpecialsCtrl =
-{
-  { VK_LEFT, SpecialKey::CtrlLeft },
-  { VK_RIGHT, SpecialKey::CtrlRight }
-};
+static const map<int, SpecialKey> g_toSpecialsCtrl = {{VK_LEFT, SpecialKey::CtrlLeft},
+                                                      {VK_RIGHT, SpecialKey::CtrlRight}};
 
 Character readChar()
 {
@@ -81,7 +66,6 @@ Character readChar()
       return resultChar;
     }
   }
-  
 }
 
 static void moveCursor(int n)
@@ -93,14 +77,8 @@ static void moveCursor(int n)
   SetConsoleCursorPosition(g_outConsole, info.dwCursorPosition);
 }
 
-void cursorLeft(int n = 1)
-{
-  moveCursor(-n);
-}
-void cursorRight(int n = 1)
-{
-  moveCursor(n);
-}
+void cursorLeft(int n = 1) { moveCursor(-n); }
+void cursorRight(int n = 1) { moveCursor(n); }
 void backspace(int n = 1)
 {
   cursorLeft(n);

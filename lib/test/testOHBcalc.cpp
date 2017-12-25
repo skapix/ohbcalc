@@ -34,6 +34,8 @@ TEST_F(OHBCalcTest, case_insensetivity)
   testEval("10h", "0x10");
   testEval("123o", "123O");
   testEval("0123", "123o");
+  testEval("ABCDEFH", "abcdefh");
+  testEval("aH", "Ah");
 }
 
 

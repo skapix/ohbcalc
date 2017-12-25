@@ -1,8 +1,8 @@
 #include "ExpressionHistory.h"
 
-ExpressionHistory::ExpressionHistory() : m_it(m_history.cend())
-{
-}
+ExpressionHistory::ExpressionHistory()
+  : m_it(m_history.cend())
+{}
 
 
 const std::string *ExpressionHistory::getElement(int relPos)
@@ -35,7 +35,8 @@ const std::string *ExpressionHistory::getElement(int relPos)
   return m_it == m_history.cend() ? nullptr : &*m_it;
 }
 
-void ExpressionHistory::push_back(std::string value) {
+void ExpressionHistory::push_back(std::string value)
+{
   m_history.push_back(std::move(value));
   m_it = m_history.end();
 }

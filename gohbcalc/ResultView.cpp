@@ -3,10 +3,10 @@
 #include "CalculatorWindow.h"
 
 const auto g_styleSheet = "QLabel {"
-  "border-style: solid;"
-  "border-width: 1px;"
-  "border-color: black; "
-  "}";
+                          "border-style: solid;"
+                          "border-width: 1px;"
+                          "border-color: black; "
+                          "}";
 
 const int g_nameWidth = 75;
 

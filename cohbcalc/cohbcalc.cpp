@@ -11,7 +11,8 @@
 
 using namespace std;
 
-namespace {
+namespace
+{
 
 struct InitConsole
 {
@@ -20,16 +21,15 @@ struct InitConsole
   ~InitConsole() { deinitConsole(); }
 };
 
-bool isExitSequence(const string &str) {
+bool isExitSequence(const string &str)
+{
   const set<string> exitSequence = {"q", "quit", "exit", "Exit"};
   return exitSequence.find(str) != exitSequence.end();
 }
 
 const string g_inputExpression = "> ";
 
-void inputExpression() {
-  cout << g_inputExpression;
-}
+void inputExpression() { cout << g_inputExpression; }
 
 string getLine()
 {
@@ -52,9 +52,11 @@ string getLine()
   }
 }
 
-inline void calculate(OHBCalc &calculator, OutputRepresentation &representation, const string &expression, size_t offset = 0)
+inline void calculate(OHBCalc &calculator, OutputRepresentation &representation, const string &expression,
+                      size_t offset = 0)
 {
-  try {
+  try
+  {
     auto result = calculator.eval(expression);
     representation.printResult(result);
   }
@@ -67,13 +69,12 @@ inline void calculate(OHBCalc &calculator, OutputRepresentation &representation,
   {
     cout << "Unexpected error: " << expr.what() << endl;
   }
-
 }
 
 } // namespace
 
 
-int main(int argc, const char * argv[])
+int main(int argc, const char *argv[])
 {
   OHBCalc calculator;
   OutputRepresentation representation;
@@ -98,7 +99,8 @@ int main(int argc, const char * argv[])
   }
 
   InitConsole consoleInitializer;
-  while (true) {
+  while (true)
+  {
     inputExpression();
     expression = getLine();
     if (isExitSequence(expression))
