@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+option(BUILD_GUI_APP "Build GUI Qt application" ON)
+
 if(MSVC)
   # Force to always compile with W4
   if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
@@ -22,7 +24,9 @@ endif()
 enable_testing()
 add_subdirectory(lib)
 add_subdirectory(cohbcalc)
-add_subdirectory(gohbcalc)
+if (BUILD_GUI_APP)
+  add_subdirectory(gohbcalc)
+endif()
 
 # uninstall target
 configure_file(

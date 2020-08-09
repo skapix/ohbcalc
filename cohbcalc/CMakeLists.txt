@@ -21,8 +21,8 @@ set(sources cohbcalc.cpp ConsoleHandler.cpp ConsoleHandler.h KeyHandler.h
 
 if (WIN32)
     set(sources ${sources} WindowsKeyHandler.cpp)
-elseif (UNIX AND NOT APPLE)
-    set(sources ${sources} LinuxKeyHandler.cpp)
+elseif (UNIX)
+    set(sources ${sources} UnixKeyHandler.cpp)
 else()
     message(WARNING "cohbcalc does not support this system. Project cohbcalc is disabled")
     return()

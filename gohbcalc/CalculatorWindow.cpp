@@ -14,7 +14,7 @@ namespace
 const auto g_bkgColor = Qt::lightGray;
 const int g_spacingBetweenEditorAndView = 10;
 const char g_binaryByteSeparator = '-';
-}
+} // namespace
 
 CalculatorWindow::CalculatorWindow()
   : m_editor(new QComboBox(this))
@@ -61,7 +61,7 @@ CalculatorWindow::CalculatorWindow()
   layout->addStretch(-1);
   setCentralWidget(centralWidget);
 
-  connect(m_editor, static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::activated), this,
+  connect(m_editor, static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::textActivated), this,
           &CalculatorWindow::on_enterPressed);
   m_decimal->setRepresentationFunction([](int64_t result) { return std::to_string(result); });
   m_udecimal->setRepresentationFunction([](int64_t result) { return std::to_string(static_cast<uint64_t>(result)); });
@@ -81,8 +81,8 @@ CalculatorWindow::CalculatorWindow()
   int lineHeight = fontMetrics().height();
   setMaximumHeight(m_editor->height() + m_errorLine->height() + g_spacingBetweenEditorAndView + m_decimal->height() +
                    lineHeight * sizeof(int64_t) + m_binary->height());
-  int zeroWidth = fontMetrics().width('0');
-  int dashWidth = fontMetrics().width(g_binaryByteSeparator);
+  int zeroWidth = fontMetrics().horizontalAdvance('0');
+  int dashWidth = fontMetrics().horizontalAdvance(g_binaryByteSeparator);
   setMinimumWidth(m_binary->width() + zeroWidth * sizeof(int64_t) * 8 + dashWidth * (sizeof(int64_t) - 1) +
                   5); // 5 is epsilon
 
@@ -109,15 +109,15 @@ void CalculatorWindow::on_enterPressed(const QString &str)
     auto metrics = QFontMetrics(m_editorFont);
     int position = static_cast<int>(error.getPos());
     auto message = QString::fromLocal8Bit(error.what());
-    int messageWLength = metrics.width(message);
+    int messageWLength = metrics.horizontalAdvance(message);
     auto qexpression = QString::fromStdString(expression);
 
-    int expressionWPos = metrics.width(qexpression, position);
-    int spaceWLength = metrics.width(QChar::fromLatin1(' '));
+    int expressionWPos = metrics.horizontalAdvance(qexpression, position);
+    int spaceWLength = metrics.horizontalAdvance(QChar::fromLatin1(' '));
 
     auto getStringOfWidth = [&metrics](const int width) {
       auto result = QString::fromLocal8Bit(" ");
-      while (metrics.width(result) < width)
+      while (metrics.horizontalAdvance(result) < width)
       {
         result.push_back(QChar::fromLatin1(' '));
       }
