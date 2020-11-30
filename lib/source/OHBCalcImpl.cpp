@@ -4,6 +4,7 @@
 #include "TokenOperation.h"
 #include <map>
 #include <cassert>
+#include <stdexcept>
 
 using namespace std;
 
