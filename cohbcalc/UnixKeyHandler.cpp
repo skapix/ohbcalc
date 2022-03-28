@@ -49,6 +49,7 @@ char getch() { return getchar(); }
 #define CHKEY_BACKSPACE 127
 #define CHKEY_DELETE 27, 91, 51, 126
 #define CHKEY_ENDLINE 10
+#define CHKEY_END_OF_TRANSMISSION 4
 
 constexpr const int ch_left[] = {CHKEY_LEFT};
 constexpr const int ch_right[] = {CHKEY_RIGHT};
@@ -63,12 +64,13 @@ constexpr const int ch_end[] = {CHKEY_END};
 constexpr const int ch_backspace[] = {CHKEY_BACKSPACE};
 constexpr const int ch_delete[] = {CHKEY_DELETE};
 constexpr const int ch_endline[] = {CHKEY_ENDLINE};
+constexpr const int ch_endoftrans[] = {CHKEY_END_OF_TRANSMISSION};
 
 #define PTRSIZE(constv) make_pair<const int *, int>(&*constv, sizeof(constv) / sizeof(constv[0]))
 constexpr const pair<const int *, int> g_allSpecial[] = {
     PTRSIZE(ch_left),      PTRSIZE(ch_right),  PTRSIZE(ch_up),     PTRSIZE(ch_down), PTRSIZE(ch_ctrlleft),
     PTRSIZE(ch_ctrlright), PTRSIZE(ch_pgup),   PTRSIZE(ch_pgdown), PTRSIZE(ch_home), PTRSIZE(ch_end),
-    PTRSIZE(ch_backspace), PTRSIZE(ch_delete), PTRSIZE(ch_endline)};
+    PTRSIZE(ch_backspace), PTRSIZE(ch_delete), PTRSIZE(ch_endline), PTRSIZE(ch_endoftrans)};
 
 
 struct CharComparator
@@ -96,7 +98,7 @@ const map<pair<const int *, int>, SpecialKey, CharComparator> g_sequence = {
     MAPVALUE(ch_down, Down),      MAPVALUE(ch_ctrlleft, CtrlLeft),   MAPVALUE(ch_ctrlright, CtrlRight),
     MAPVALUE(ch_pgup, PageUp),    MAPVALUE(ch_pgdown, PageDown),     MAPVALUE(ch_home, Home),
     MAPVALUE(ch_end, End),        MAPVALUE(ch_backspace, BackSpace), MAPVALUE(ch_delete, Delete),
-    MAPVALUE(ch_endline, EndLine)};
+    MAPVALUE(ch_endline, EndLine), MAPVALUE(ch_endoftrans, EndOfTransmission)};
 
 #undef PTRSIZE
 #undef MAPVALUE

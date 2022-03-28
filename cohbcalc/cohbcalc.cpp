@@ -44,7 +44,7 @@ string getLine()
     {
       SpecialKey key = get<SpecialKey>(c);
       handleSpecialKey(key);
-      if (key == SpecialKey::EndLine)
+      if (key == SpecialKey::EndLine || key == SpecialKey::EndOfTransmission)
       {
         return getExpression();
       }

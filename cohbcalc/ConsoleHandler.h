@@ -19,7 +19,8 @@ enum class SpecialKey : char
   End,
   Delete,
   BackSpace,
-  EndLine
+  EndLine,
+  EndOfTransmission,
 };
 
 using Character = std::variant<char, SpecialKey>;

@@ -162,6 +162,14 @@ void handleSpecialKey(const SpecialKey key)
   case SpecialKey::Undefined:
     // do nothing
     break;
+  case SpecialKey::EndOfTransmission:
+    if (!g_currentExpression.empty()) {
+      // do nothing
+      break;
+    }
+    g_currentExpression = "exit"; // Should be one of exit sequence.
+    handleSpecialKey(SpecialKey::EndLine);
+    break;
   }
 }
 

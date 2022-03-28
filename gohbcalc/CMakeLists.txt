@@ -2,7 +2,12 @@ cmake_minimum_required(VERSION 3.0)
 
 project(gohbcalc)
 
-find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
+find_package(Qt5 5.12.0 COMPONENTS Core Widgets)
+
+if (NOT Qt5_FOUND)
+    message(WARNING "Qt5 not found. Skip building GUI application")
+    return()
+endif()
 
 set(CMAKE_AUTOMOC ON)
 

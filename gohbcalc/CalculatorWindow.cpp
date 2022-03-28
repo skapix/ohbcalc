@@ -60,8 +60,7 @@ CalculatorWindow::CalculatorWindow()
   layout->addWidget(m_binary);
   layout->addStretch(-1);
   setCentralWidget(centralWidget);
-
-  connect(m_editor, static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::textActivated), this,
+  connect(m_editor, static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::activated), this,
           &CalculatorWindow::on_enterPressed);
   m_decimal->setRepresentationFunction([](int64_t result) { return std::to_string(result); });
   m_udecimal->setRepresentationFunction([](int64_t result) { return std::to_string(static_cast<uint64_t>(result)); });

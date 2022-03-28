@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.0)
 project(ohbcalc)
 
 set(public_include include/ohbTransform.h include/transformImpl/TransformImpl.h
-		include/ohbException.h include/ohbcalc.h)
+                include/ohbException.h include/ohbcalc.h)
 
 set(sources source/OHBCalcLib.cpp source/OHBCalcImpl.cpp source/OHBCalcImpl.h
 		source/TokenOperation.cpp source/TokenOperation.h source/CommonDefines.h

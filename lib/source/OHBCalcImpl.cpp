@@ -175,7 +175,7 @@ int64_t getValue(CStringView expression, size_t &pos)
     return false;
   };
 
-  auto isBin = [&localPos](CStringView &number)
+  auto isBin = [/*&localPos*/](CStringView &number)
   {
     if (number.length() > 1 && (lastIdentificator(number) == 'b' || lastIdentificator(number) == 'i'))
     {

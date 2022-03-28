@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <exception>
 
 class OHBException : public std::exception
 {
@@ -10,7 +11,7 @@ public:
     , message(message)
   {}
 
-  virtual const char*what() const noexcept override
+  virtual const char* what() const noexcept override
   {
     return message.c_str();
   }
